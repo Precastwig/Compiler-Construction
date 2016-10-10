@@ -1,4 +1,5 @@
 %token <int> INT
+%token SEMICOLON
 %token PLUS
 %token TIMES
 %token MINUS
@@ -18,10 +19,10 @@
 %left DIVIDE
 %left TIMES 
 %left NOT 		/* high precedence */
-%start <int> top
+%start <int list> top
 %%
 top:
-	| e = exp; EOF		{ e }
+	| el = separated_list( SEMICOLON, exp); EOF		{ el }
 
 exp:
 	| i = INT			{ i }

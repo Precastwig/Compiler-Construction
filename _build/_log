@@ -2,17 +2,20 @@
 # Target: exp_test.ml.depends, tags: { extension:ml, file:exp_test.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules exp_test.ml > exp_test.ml.depends # cached
 # Target: exp_lex.mll, tags: { extension:mll, file:exp_lex.mll, lexer, ocaml, ocamllex, quiet }
-/home/precastwig/.opam/4.02.1/bin/ocamllex.opt -q exp_lex.mll
+/home/precastwig/.opam/4.02.1/bin/ocamllex.opt -q exp_lex.mll # cached
 # Target: exp_lex.ml.depends, tags: { extension:ml, file:exp_lex.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules exp_lex.ml > exp_lex.ml.depends
+ocamlfind ocamldep -modules exp_lex.ml > exp_lex.ml.depends # cached
 # Target: exp_par.mly.depends, tags: { extension:mly, file:exp_par.mly, menhir_ocamldep, ocaml, ocamldep, quiet }
-menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' exp_par.mly > exp_par.mly.depends # cached
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' exp_par.mly > exp_par.mly.depends
 # Target: exp_par.mly, tags: { byte, compile, extension:mly, file:exp_par.mly, menhir, ocaml, parser, quiet }
-menhir --ocamlc 'ocamlfind ocamlc' --infer exp_par.mly # cached
+menhir --ocamlc 'ocamlfind ocamlc' --infer exp_par.mly
++ menhir --ocamlc 'ocamlfind ocamlc' --infer exp_par.mly
+Warning: 11 states have shift/reduce conflicts.
+Warning: 22 shift/reduce conflicts were arbitrarily resolved.
 # Target: exp_par.mli.depends, tags: { extension:mli, file:exp_par.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules exp_par.mli > exp_par.mli.depends # cached
+ocamlfind ocamldep -modules exp_par.mli > exp_par.mli.depends
 # Target: exp_par.cmi, tags: { byte, compile, extension:mli, file:exp_par.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o exp_par.cmi exp_par.mli # cached
+ocamlfind ocamlc -c -o exp_par.cmi exp_par.mli
 # Target: exp_lex.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:exp_lex.cmo, file:exp_lex.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o exp_lex.cmo exp_lex.ml
 # Target: exp_test.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:exp_test.cmo, file:exp_test.ml, implem, ocaml, quiet }

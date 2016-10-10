@@ -13,6 +13,7 @@ rule read =
 	| white { read lexbuf }
 	| newline { read lexbuf }
 	| int 	{ INT (int_of_string (Lexing.lexeme lexbuf)) }
+	| ';'	{ SEMICOLON }
 	| '|'  { OR }
 	| '&'  { AND }
 	| '='	{ EQUAL }

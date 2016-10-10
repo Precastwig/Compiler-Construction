@@ -3,6 +3,7 @@
 
 type token = 
   | TIMES
+  | SEMICOLON
   | PLUS
   | OR
   | NOT
@@ -21,4 +22,4 @@ exception Error
 
 (* The monolithic API. *)
 
-val top: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (int)
+val top: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (int list)

@@ -1,1 +1,1 @@
-exp_test.ml: Exp_lex Exp_par Lexing
+exp_test.ml: Buffer Exp_lex Exp_par Lexing List String

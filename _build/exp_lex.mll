@@ -4,8 +4,10 @@ exception SyntaxError of string
 }
 
 let int = ['0'-'9'] ['0'-'9']*
-let var = ['a'-'Z'] ['a'-'Z']*
+let wloop = "while"
+let d = "do"
 let white = [' ' '\t']+
+let str = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_']*
 let newline = '\r' | '\n' | "\r\n"
 
 rule read = 
@@ -13,6 +15,22 @@ rule read =
 	| white { read lexbuf }
 	| newline { read lexbuf }
 	| int 	{ INT (int_of_string (Lexing.lexeme lexbuf)) }
+	| wloop { WHILE }
+	| d		{ DO }	
+	| "if"	{ IF }
+	| "else"	{ ELSE }
+	| ":="	{ ASSIGN }
+	| "read_int" { READINT }
+	| "print_int" { PRINTINT }
+	| "let"	{ LET }
+	| "in"	{ IN }
+	| "new"	{ NEW }
+	| str	{ STR (Lexing.lexeme lexbuf) }
+	| '{'	{ LEFTBRACE }
+	| '}'	{ RIGHTBRACE }
+	| '('	{ LEFTROUNDBRACKET }
+	| ')'	{ RIGHTROUNDBRACKET }
+	| ','	{ COMMA }
 	| ';'	{ SEMICOLON }
 	| '|'  { OR }
 	| '&'  { AND }

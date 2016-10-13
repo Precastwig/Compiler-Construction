@@ -5,8 +5,9 @@ type opcode =
 type expression =
   | Seq of expression * expression (* e; e *)
   | While of expression * expression (* while e do e *)
-  | If of expression * expression * expression (* if e do e else e *)
-  | Asg of expression * expression (* e := e *)
+  | Ifelse of expression * expression * expression (* if e do e else e *)
+  | If of expression * expression
+  | Asg of string * expression (* e := e *)
   | Deref of expression (* !e *)
   | Operator of opcode * expression * expression (* e + e *)
   | Application of expression * expression (* e(e) *)

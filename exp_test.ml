@@ -1,4 +1,7 @@
 open Types
+open Exp_lex
+open Lexing
+open Printf
 
 let rec read_to_empty buf = 
 	let s = read_line() in
@@ -21,25 +24,26 @@ let printopcode o i =
 	| Noteq	-> printi i ^ "NOT EQUAL"
 	| And	-> printi i ^ "AND"
 	| Or	-> printi i ^ "OR"
-	| Not ->   printi i ^ "NOT"
+	| Not 	-> printi i ^ "NOT"
 
 
 let rec printexp e i= 
 	let i = i + 4 in
 	match e with
-	| Seq (f, p) -> 	printi i ^ "Seq of (\n" 	^ printexp f i ^ ",\n " ^ printexp p i ^ ")"
-	| While (f, p) -> 	printi i ^ "While of (\n" 	^ printexp f i ^ ",\n " ^ printexp p i ^ ")"
-	| If (f, p, q)	-> 	printi i ^ "If of (\n" 		^ printexp f i ^ ",\n " ^ printexp p i ^ ",\n " ^ printexp q i ^ ")"
-	| Asg (f, p) -> 	printi i ^ "Assignment of (\n" 	^ printexp f i ^ ",\n " ^ printexp p i ^ ")"
-	| Deref f	->		printi i ^ "Dereference of \n" 	^ printexp f i
-	| Operator (o, f, p) -> printi i ^ "Operator of (\n" 	^ printexp f i ^ ",\n " ^ printopcode o (i+4) ^ ",\n " ^ printexp p i ^ ")"
-	| Application (f, p) -> printi i ^ "Application of (" 	^ printexp f i ^ ",\n " ^ printexp p i ^ ")"
-	| Const x	-> 		printi i ^ "Const of " 		^ string_of_int x
-	| Readint 	-> 		printi i ^ "Readint"
-	| Printint f ->		printi i ^ "print_int of " 	^ printexp f i
-	| Identifier s	-> 	printi i ^ "Identifier of " ^ s
-	| Let (s, f, p)	-> 	printi i ^ "Let of (" ^ s ^ ",\n " ^ printexp f i ^ ",\n " ^ printexp p i ^ ")"
-	| New (s, f, p)	-> 	printi i ^ "New of (" ^ s ^ ",\n " ^ printexp f i ^ ",\n " ^ printexp p i ^ ")"
+	| Seq (f, p) 		-> 	printi i ^ "Seq of (\n" 		^ printexp f (i-4) ^ ",\n" ^ printexp p (i-4) ^ ")"
+	| While (f, p) 		-> 	printi i ^ "While of (\n" 		^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
+	| Ifelse (f, p, q)	-> 	printi i ^ "Ifelse of (\n" 		^ printexp f i ^ ",\n" ^ printexp p i ^ ",\n" ^ printexp q i ^ ")"
+	| If (f, p)			->	printi i ^ "If of (\n" 			^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
+	| Asg (s, p) 		-> 	printi i ^ "Assignment of (\n" 	^ printi (i+4) ^ s ^ ",\n" ^ printexp p i ^ ")"
+	| Deref f			->	printi i ^ "Dereference of \n" 	^ printexp f i
+	| Operator (o, f, p)-> 	printi i ^ "Operator of (\n" 	^ printexp f i ^ ",\n" ^ printopcode o (i+4) ^ ",\n" ^ printexp p i ^ ")"
+	| Application (f, p)-> 	printi i ^ "Application of (" 	^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
+	| Const x			-> 	printi i ^ "Const of " 			^ string_of_int x
+	| Readint 			-> 	printi i ^ "Readint"
+	| Printint f 		->	printi i ^ "print_int of " 		^ printexp f i
+	| Identifier s		-> 	printi i ^ "Identifier of " 	^ s
+	| Let (s, f, p)		-> 	printi i ^ "Let of (" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
+	| New (s, f, p)		-> 	printi i ^ "New of (" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
 
 let rec stringlist sl =
 	match sl with
@@ -54,16 +58,36 @@ let printfunc f =
 let rec printlistfunctions l =
 	match l with
 	| [] -> ""
-	| x :: [] -> "function " ^ printfunc x ^ "\n"
-	| x :: xs -> "function " ^ printfunc x ^ ",\n" ^ printlistfunctions xs
+	| x :: [] -> "function (" ^ printfunc x ^ ")\n"
+	| x :: xs -> "function (" ^ printfunc x ^ "),\n" ^ printlistfunctions xs
 	
 
-let outputprog prog = "[" ^ printlistfunctions prog ^ "]"
+let outputprog prog = "[" ^ printlistfunctions prog ^ "]" ^ "\n"
+
+let load_file f =
+	let ic = open_in f in
+	let n = in_channel_length ic in
+	let s = String.create n in
+	really_input ic s 0 n;
+	close_in ic;
+	(s)
+
+let print_position lexbuf =
+	let pos = lexbuf.lex_curr_p in
+	eprintf "Pos %d:%d:%d\n" pos.pos_lnum pos.pos_bol pos.pos_cnum
+
+let parsewitherror lexbuf =
+	try Exp_par.top Exp_lex.read lexbuf with
+	| SyntaxError msg -> prerr_string (msg ^ ": ");
+						print_position lexbuf;
+						exit (-1)
+	| Exp_par.Error -> prerr_string "Parse error: ";
+						print_position lexbuf;
+						exit (-1)
 
 let _ = 
-	read_to_empty (Buffer.create 1)
-	|> Buffer.contents
+	load_file "test1.ml"
 	|> Lexing.from_string 
-	|> Exp_par.top Exp_lex.read 
+	|> parsewitherror
 	|> outputprog
 	|> print_string;

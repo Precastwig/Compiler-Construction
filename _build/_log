@@ -21,6 +21,10 @@ ocamlfind ocamlc -c -o exp_par.cmi exp_par.mli # cached
 ocamlfind ocamlc -c -o exp_lex.cmo exp_lex.ml # cached
 # Target: exp_test.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:exp_test.cmo, file:exp_test.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o exp_test.cmo exp_test.ml
++ ocamlfind ocamlc -c -o exp_test.cmo exp_test.ml
+File "exp_test.ml", line 70, characters 9-22:
+Warning 3: deprecated: String.create
+Use Bytes.create instead.
 # Target: exp_par.ml.depends, tags: { extension:ml, file:exp_par.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules exp_par.ml > exp_par.ml.depends # cached
 # Target: Types.cmx, tags: { compile, extension:cmx, extension:ml, file:Types.cmx, file:Types.ml, implem, native, ocaml, quiet }
@@ -31,6 +35,10 @@ ocamlfind ocamlopt -c -o exp_par.cmx exp_par.ml # cached
 ocamlfind ocamlopt -c -o exp_lex.cmx exp_lex.ml # cached
 # Target: exp_test.cmx, tags: { compile, extension:cmx, extension:ml, file:exp_test.cmx, file:exp_test.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o exp_test.cmx exp_test.ml
++ ocamlfind ocamlopt -c -o exp_test.cmx exp_test.ml
+File "exp_test.ml", line 70, characters 9-22:
+Warning 3: deprecated: String.create
+Use Bytes.create instead.
 # Target: exp_test.native, tags: { dont_link_with, extension:native, file:exp_test.native, link, native, ocaml, program, quiet }
 ocamlfind ocamlopt -linkpkg Types.cmx exp_par.cmx exp_lex.cmx exp_test.cmx -o exp_test.native
 # Compilation successful.

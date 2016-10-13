@@ -31,9 +31,18 @@
 %token LET
 %token IN
 %token NEW
-%left ASSIGN
+
+%left COMMA
+%left WHILE
+%left DO
+%left IF
+%left ELSE
+%left LET
+%left IN
+%left NEW
 %left OR
 %left AND
+%left ASSIGN
 %left EQUAL
 %left LESS
 %left GREATER
@@ -41,16 +50,16 @@
 %left MINUS
 %left DIVIDE
 %left TIMES
-%left WHILE
-%left DO
-%left IF
-%left ELSE
 %left NOT
 %left INT
-%left COMMA
-%left SEMICOLON
+%left READINT
+%left PRINTINT
 %left LEFTROUNDBRACKET
 %left RIGHTROUNDBRACKET	
+%left SEMICOLON
+%left LEFTBRACE
+%left RIGHTBRACE
+%left STR
 %left EOF 	/* high precedence */
 %start <Types.program> top
 %%
@@ -64,19 +73,24 @@ args:
 	| l = separated_list( COMMA , STR );		{ l }
 
 exp:
+	| LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { e }
 	| e = exp; SEMICOLON; p = exp				{ Types.Seq (e, p) }
 	| WHILE; e = exp; DO; p = exp				{ Types.While (e, p) }
-	| IF; e = exp; DO; p = exp; ELSE; f = exp 	{ Types.If (e, p, f) }
-	| e = exp; ASSIGN; p = exp					{ Types.Asg (e, p) }
+	| IF; e = lexp; DO; p = exp					{ Types.If (e, p) }
+	| IF; e = lexp; DO; p = exp; ELSE; f = exp 	{ Types.Ifelse (e, p, f) }
+	| s = STR; ASSIGN; p = lexp					{ Types.Asg (s, p) }
 	| NOT; e = exp								{ Types.Deref e }
-	| e = exp; o = opcode; p = exp 				{ Types	.Operator (o, e, p) }
-	| e = exp; LEFTROUNDBRACKET; p = exp; RIGHTROUNDBRACKET { Types.Application (e, p) }
-	| i = INT									{ Types.Const i }
+	| e = exp; LEFTROUNDBRACKET; p = args; RIGHTROUNDBRACKET { Types.Application (e, p) }
 	| READINT; LEFTROUNDBRACKET; RIGHTROUNDBRACKET { Types.Readint }
 	| PRINTINT; LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { Types.Printint (e) }
-	| s = STR										{ Types.Identifier s }
-	| LET; s = STR; EQUAL; e = exp; IN; f = exp	{ Types.Let (s, e, f) }
-	| NEW; s = STR; EQUAL; e = exp; IN; f = exp { Types.New (s, e, f) }
+	| LET; s = STR; EQUAL; e = lexp; IN; f = exp	{ Types.Let (s, e, f) }
+	| NEW; s = STR; EQUAL; e = lexp; IN; f = exp { Types.New (s, e, f) }
+
+lexp:
+	| LEFTROUNDBRACKET; e = lexp; RIGHTROUNDBRACKET { e }
+	| e = lexp; o = opcode; p = lexp 				{ Types.Operator (o, e, p) }
+	| i = INT									{ Types.Const i }
+	| s = STR									{ Types.Identifier s }
 
 opcode:
 	| PLUS	{ Plus }

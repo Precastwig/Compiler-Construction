@@ -1,1 +1,1 @@
-exp_test.ml: Buffer Exp_lex Exp_par Lexing Types
+exp_test.ml: Buffer Exp_lex Exp_par Lexing Printf String Types

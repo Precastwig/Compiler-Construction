@@ -19,5 +19,6 @@ recursive (f,a,b,TOL,NMAX,n) {
 		if f(c) = 0 | (b-a)/2 > TOL do {
 			return(c);
 		};
+		recursive(f,a,b,TOL,NMAX,(n+1))
 	}
 }

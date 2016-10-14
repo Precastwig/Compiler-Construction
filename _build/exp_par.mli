@@ -4,6 +4,7 @@
 type token = 
   | WHILE
   | TIMES
+  | STRING of (string)
   | STR of (string)
   | SEMICOLON
   | RIGHTROUNDBRACKET

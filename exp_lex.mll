@@ -7,7 +7,8 @@ let int = ['0'-'9'] ['0'-'9']*
 let wloop = "while"
 let d = "do"
 let white = [' ' '\t']+
-let str = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_']*
+let str = ['a'-'z' 'A'-'Z' '_' '0'-'9'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
+let quote = "\"" ['a'-'z' 'A'-'Z' '_' '0'-'9' ' ' '.' ',' ';' '@' '#']* "\""
 let newline = '\r' | '\n' | "\r\n"
 
 rule read = 
@@ -17,6 +18,7 @@ rule read =
 	| int 	{ INT (int_of_string (Lexing.lexeme lexbuf)) }
 	| wloop { WHILE }
 	| d		{ DO }	
+	| quote { STRING (Lexing.lexeme lexbuf) }
 	| "if"	{ IF }
 	| "else"	{ ELSE }
 	| ":="	{ ASSIGN }

@@ -1,7 +1,7 @@
 type opcode =
   | Plus | Minus | Times | Divide
   | Leq | Geq | Equal | Noteq
-  | And | Or | Not
+  | And | Or | Not | Greater | Less
 type expression =
   | Seq of expression * expression (* e; e *)
   | While of expression * expression (* while e do e *)
@@ -15,6 +15,7 @@ type expression =
   | Readint (* read_int () *)
   | Printint of expression (* print_int (e) *)
   | Identifier of string (* x *)
+  | String of string
   | Let of string * expression * expression (* let x = e in e *)
   | New of string * expression * expression (* new x = e in e *)
 type fundef = string * string list * expression

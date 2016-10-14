@@ -1,18 +1,27 @@
 ### Starting build.
 # Target: exp_test.ml.depends, tags: { extension:ml, file:exp_test.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules exp_test.ml > exp_test.ml.depends
+ocamlfind ocamldep -modules exp_test.ml > exp_test.ml.depends # cached
 # Target: exp_lex.mll, tags: { extension:mll, file:exp_lex.mll, lexer, ocaml, ocamllex, quiet }
 /home/precastwig/.opam/4.02.1/bin/ocamllex.opt -q exp_lex.mll # cached
 # Target: exp_lex.ml.depends, tags: { extension:ml, file:exp_lex.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules exp_lex.ml > exp_lex.ml.depends # cached
 # Target: exp_par.mly.depends, tags: { extension:mly, file:exp_par.mly, menhir_ocamldep, ocaml, ocamldep, quiet }
-menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' exp_par.mly > exp_par.mly.depends # cached
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' exp_par.mly > exp_par.mly.depends
 # Target: Types.ml.depends, tags: { extension:ml, file:Types.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules Types.ml > Types.ml.depends # cached
 # Target: Types.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Types.cmo, file:Types.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o Types.cmo Types.ml # cached
 # Target: exp_par.mly, tags: { byte, compile, extension:mly, file:exp_par.mly, menhir, ocaml, parser, quiet }
-menhir --ocamlc 'ocamlfind ocamlc' --infer exp_par.mly # cached
+menhir --ocamlc 'ocamlfind ocamlc' --infer exp_par.mly
++ menhir --ocamlc 'ocamlfind ocamlc' --infer exp_par.mly
+File "exp_par.mly", line 40, characters 0-5:
+Warning: the precedence level assigned to IF is never useful.
+File "exp_par.mly", line 42, characters 0-5:
+Warning: the precedence level assigned to LET is never useful.
+File "exp_par.mly", line 42, characters 0-5:
+Warning: the precedence level assigned to NEW is never useful.
+File "exp_par.mly", line 39, characters 0-5:
+Warning: the precedence level assigned to WHILE is never useful.
 # Target: exp_par.mli.depends, tags: { extension:mli, file:exp_par.mli, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules exp_par.mli > exp_par.mli.depends # cached
 # Target: exp_par.cmi, tags: { byte, compile, extension:mli, file:exp_par.mli, interf, ocaml, quiet }
@@ -20,23 +29,19 @@ ocamlfind ocamlc -c -o exp_par.cmi exp_par.mli # cached
 # Target: exp_lex.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:exp_lex.cmo, file:exp_lex.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o exp_lex.cmo exp_lex.ml # cached
 # Target: exp_test.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:exp_test.cmo, file:exp_test.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o exp_test.cmo exp_test.ml
-+ ocamlfind ocamlc -c -o exp_test.cmo exp_test.ml
-File "exp_test.ml", line 70, characters 9-22:
-Warning 3: deprecated: String.create
-Use Bytes.create instead.
+ocamlfind ocamlc -c -o exp_test.cmo exp_test.ml # cached
 # Target: exp_par.ml.depends, tags: { extension:ml, file:exp_par.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules exp_par.ml > exp_par.ml.depends # cached
+ocamlfind ocamldep -modules exp_par.ml > exp_par.ml.depends
 # Target: Types.cmx, tags: { compile, extension:cmx, extension:ml, file:Types.cmx, file:Types.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o Types.cmx Types.ml # cached
 # Target: exp_par.cmx, tags: { compile, extension:cmx, extension:ml, file:exp_par.cmx, file:exp_par.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o exp_par.cmx exp_par.ml # cached
+ocamlfind ocamlopt -c -o exp_par.cmx exp_par.ml
 # Target: exp_lex.cmx, tags: { compile, extension:cmx, extension:ml, file:exp_lex.cmx, file:exp_lex.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o exp_lex.cmx exp_lex.ml # cached
+ocamlfind ocamlopt -c -o exp_lex.cmx exp_lex.ml
 # Target: exp_test.cmx, tags: { compile, extension:cmx, extension:ml, file:exp_test.cmx, file:exp_test.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o exp_test.cmx exp_test.ml
 + ocamlfind ocamlopt -c -o exp_test.cmx exp_test.ml
-File "exp_test.ml", line 70, characters 9-22:
+File "exp_test.ml", line 73, characters 9-22:
 Warning 3: deprecated: String.create
 Use Bytes.create instead.
 # Target: exp_test.native, tags: { dont_link_with, extension:native, file:exp_test.native, link, native, ocaml, program, quiet }

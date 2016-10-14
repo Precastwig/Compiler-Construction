@@ -12,6 +12,12 @@ let rec read_to_empty buf =
 
 let rec printi i = if i > 0 then " " ^ printi (i-1) else ""
 
+let rec stringlist sl =
+	match sl with
+	| [] -> ""
+	| x :: [] -> x
+	| x :: xs -> x ^ "," ^ stringlist xs
+
 let printopcode o i =
 	match o with
 	| Plus	-> printi i ^ "PLUS"
@@ -25,6 +31,8 @@ let printopcode o i =
 	| And	-> printi i ^ "AND"
 	| Or	-> printi i ^ "OR"
 	| Not 	-> printi i ^ "NOT"
+	| Greater -> printi i ^ "GREATER"
+	| Less	-> printi i ^ "LESS"
 
 
 let rec printexp e i= 
@@ -37,19 +45,14 @@ let rec printexp e i=
 	| Asg (s, p) 		-> 	printi i ^ "Assignment of (\n" 	^ printi (i+4) ^ s ^ ",\n" ^ printexp p i ^ ")"
 	| Deref f			->	printi i ^ "Dereference of \n" 	^ printexp f i
 	| Operator (o, f, p)-> 	printi i ^ "Operator of (\n" 	^ printexp f i ^ ",\n" ^ printopcode o (i+4) ^ ",\n" ^ printexp p i ^ ")"
-	| Application (f, p)-> 	printi i ^ "Application of (" 	^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
+	| Application (f, p)-> 	printi i ^ "Application of (\n" 	^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
 	| Const x			-> 	printi i ^ "Const of " 			^ string_of_int x
 	| Readint 			-> 	printi i ^ "Readint"
 	| Printint f 		->	printi i ^ "print_int of " 		^ printexp f i
 	| Identifier s		-> 	printi i ^ "Identifier of " 	^ s
-	| Let (s, f, p)		-> 	printi i ^ "Let of (" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
-	| New (s, f, p)		-> 	printi i ^ "New of (" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
-
-let rec stringlist sl =
-	match sl with
-	| [] -> ""
-	| x :: [] -> x
-	| x :: xs -> x ^ "," ^ stringlist xs
+	| String s 			->  printi i ^ "String of " 		^ s
+	| Let (s, f, p)		-> 	printi i ^ "Let of (\n" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
+	| New (s, f, p)		-> 	printi i ^ "New of (\n" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
 
 let printfunc f =
 	let (s, sl, e) = f in
@@ -86,7 +89,7 @@ let parsewitherror lexbuf =
 						exit (-1)
 
 let _ = 
-	load_file "test1.ml"
+	load_file "bisection.ml"
 	|> Lexing.from_string 
 	|> parsewitherror
 	|> outputprog

@@ -4,6 +4,7 @@
 
 %token <int> INT
 %token <string> STR
+%token <string> STRING
 %token LEFTBRACE
 %token RIGHTBRACE
 %token LEFTROUNDBRACKET
@@ -33,34 +34,29 @@
 %token NEW
 
 %left COMMA
-%left WHILE
-%left DO
+%left SEMICOLON
+
+%left WHILE DO 
 %left IF
 %left ELSE
-%left LET
-%left IN
-%left NEW
+%left LET NEW IN
+
 %left OR
 %left AND
-%left ASSIGN
+
 %left EQUAL
 %left LESS
 %left GREATER
+
+%left ASSIGN
+
 %left PLUS
 %left MINUS
 %left DIVIDE
 %left TIMES
+
 %left NOT
-%left INT
-%left READINT
-%left PRINTINT
-%left LEFTROUNDBRACKET
-%left RIGHTROUNDBRACKET	
-%left SEMICOLON
-%left LEFTBRACE
-%left RIGHTBRACE
-%left STR
-%left EOF 	/* high precedence */
+%left LEFTROUNDBRACKET  /* high precedence */
 %start <Types.program> top
 %%
 top:
@@ -73,12 +69,31 @@ args:
 	| l = separated_list( COMMA , STR );		{ l }
 
 exp:
+	| e = exp; COMMA; p = exp					{ Types.Seq (e, p) } 
+	| s = STR; ASSIGN; p = exp					{ Types.Asg (s, p) }
 	| LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { e }
+	| LEFTBRACE; e = exp; RIGHTBRACE			{ e }
 	| e = exp; SEMICOLON; p = exp				{ Types.Seq (e, p) }
-	| WHILE; e = exp; DO; p = exp				{ Types.While (e, p) }
-	| IF; e = lexp; DO; p = exp					{ Types.If (e, p) }
-	| IF; e = lexp; DO; p = exp; ELSE; f = exp 	{ Types.Ifelse (e, p, f) }
-	| s = STR; ASSIGN; p = lexp					{ Types.Asg (s, p) }
+	| e = exp; SEMICOLON;						{ e }
+	| WHILE; e = exp; DO; LEFTBRACE; p = exp; RIGHTBRACE { Types.While (e, p) }
+	| IF; e = exp; DO; p = exp;					{ Types.If (e, p) }
+	| IF; e = exp; DO; p = exp; ELSE; f = exp 	{ Types.Ifelse (e, p, f) }
+	| e = exp; PLUS; p = exp 				{ Types.Operator (Plus, e, p) }
+	| e = exp; MINUS; p = exp 				{ Types.Operator (Minus, e, p) }
+	| e = exp; TIMES; p = exp 				{ Types.Operator (Times, e, p) }
+	| e = exp; DIVIDE; p = exp 				{ Types.Operator (Divide, e, p) }
+	| e = exp; EQUAL; p = exp 				{ Types.Operator (Equal, e, p) }
+	| e = exp; LESS; EQUAL; p = exp 				{ Types.Operator (Leq, e, p) }
+	| e = exp; GREATER; EQUAL; p = exp 				{ Types.Operator (Geq, e, p) }
+	| e = exp; GREATER; p = exp				{ Types.Operator (Greater, e, p) }
+	| e = exp; LESS; p = exp				{ Types.Operator (Less, e, p) }
+	| e = exp; NOT; EQUAL; p = exp 				{ Types.Operator (Noteq, e, p) }
+	| e = exp; AND; p = exp 				{ Types.Operator (And, e, p) }
+	| e = exp; OR; p = exp 				{ Types.Operator (Or, e, p) }
+	| e = exp; NOT; p = exp 				{ Types.Operator (Not, e, p) }
+	| i = INT									{ Types.Const i }
+	| s = STR									{ Types.Identifier s }
+	| s = STRING								{ Types.String s } 
 	| NOT; e = exp								{ Types.Deref e }
 	| e = exp; LEFTROUNDBRACKET; p = exp; RIGHTROUNDBRACKET { Types.Application (e, p) }
 	| READINT; LEFTROUNDBRACKET; RIGHTROUNDBRACKET { Types.Readint }
@@ -86,21 +101,3 @@ exp:
 	| LET; s = STR; EQUAL; e = exp; IN; f = exp	{ Types.Let (s, e, f) }
 	| NEW; s = STR; EQUAL; e = exp; IN; f = exp { Types.New (s, e, f) }
 
-lexp:
-	| LEFTROUNDBRACKET; e = lexp; RIGHTROUNDBRACKET { e }
-	| e = lexp; o = opcode; p = lexp 				{ Types.Operator (o, e, p) }
-	| i = INT									{ Types.Const i }
-	| s = STR									{ Types.Identifier s }
-
-opcode:
-	| PLUS	{ Plus }
-	| MINUS { Minus }
-	| TIMES	{ Times }
-	| DIVIDE { Divide}
-	| EQUAL { Equal }
-	| LESS; EQUAL { Leq }
-	| GREATER; EQUAL { Geq }
-	| NOT; EQUAL	{ Noteq }
-	| AND	{ And }
-	| OR	{ Or }
-	| NOT	{ Not }

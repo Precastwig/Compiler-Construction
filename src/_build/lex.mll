@@ -8,6 +8,7 @@ let wloop = "while"
 let d = "do"
 let white = [' ' '\t']+
 let str = ['a'-'z' 'A'-'Z' '_' '0'-'9'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
+let comment = "/*" (str | '\n'| '\r' | "\r\n" | ' ' | '(' | ')' | '{' | '}' | '=' | ',' | ';' | '|' | '<' | '>' | '/' | '+' | '*' | '-' | '!' | ':' | '/')* "*/"
 let quote = "\"" ['a'-'z' 'A'-'Z' '_' '0'-'9' ' ' '.' ',' ';' '@' '#']* "\""
 let newline = '\r' | '\n' | "\r\n"
 
@@ -15,6 +16,7 @@ rule read =
 	parse
 	| white { read lexbuf }
 	| newline { read lexbuf }
+	| comment { read lexbuf }
 	| int 	{ INT (int_of_string (Lexing.lexeme lexbuf)) }
 	| wloop { WHILE }
 	| d		{ DO }	

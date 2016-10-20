@@ -81,29 +81,53 @@ let print_position lexbuf =
 
 let store = Hashtbl.create 100
 
+type maybe = 
+	| Cons of int
+	| True
+	| False
+	| Unit
+
+let deref e =
+	match e with
+	| Cons x -> x
+	| True -> 1
+	| False -> 0	
+
 let rec evaltonum e =
 	match e with
 	| Seq (f, p)			-> let _ = evaltonum f in evaltonum p
-	| Const x 				-> x
-	| Operator (Plus, f, p)	-> evaltonum f + evaltonum p
-	| Operator (Minus, f, p)-> evaltonum f - evaltonum p
-	| Operator (Times, f, p)-> evaltonum f * evaltonum p
-	| Operator (Divide, f,p)-> evaltonum f / evaltonum p
-	| Operator (Leq,f, p)	-> if evaltonum f <= evaltonum p then 1 else 0
-	| Operator (Geq,f, p)	-> if evaltonum f >= evaltonum p then 1 else 0
-	| Operator (Equal,f,p)	-> if evaltonum f == evaltonum p then 1 else 0
-	| Operator (Noteq,f,p)	-> if evaltonum f != evaltonum p then 1 else 0
-	| Operator (And,f,p)	-> if evaltonum f == 1 && evaltonum p == 1 then 1 else 0
-	| Operator (Or, f, p)	-> if evaltonum f == 1 || evaltonum p == 1 then 1 else 0
-	| Operator (Not, f, p) 	-> if evaltonum f == 1 then 0 else 1
-	| Operator (Greater,f,p)-> if evaltonum f > evaltonum p then 1 else 0
-	| Operator (Less,f,p)	-> if evaltonum f < evaltonum p then 1 else 0
-	| Asg (Identifier x, e) -> let v = evaltonum e in Hashtbl.replace store x v; v
+	| Const x	 			-> Cons x
+	| Operator (Plus, f, p)	-> Cons (deref (evaltonum f) + deref (evaltonum p))
+	| Operator (Minus, f, p)-> Cons (deref (evaltonum f) - deref (evaltonum p))
+	| Operator (Times, f, p)-> Cons (deref (evaltonum f) * deref (evaltonum p))
+	| Operator (Divide, f,p)-> Cons (deref (evaltonum f) / deref (evaltonum p))
+	| Operator (Leq,f, p)	-> if deref (evaltonum f) <= deref (evaltonum p) then True else False
+	| Operator (Geq,f, p)	-> if deref (evaltonum f) >= deref (evaltonum p) then True else False
+	| Operator (Equal,f,p)	-> if deref (evaltonum f) == deref (evaltonum p) then True else False
+	| Operator (Noteq,f,p)	-> if deref (evaltonum f) != deref (evaltonum p) then True else False
+	| Operator (And,f,p)	-> if deref (evaltonum f) == 1 && deref (evaltonum p) == 1 then True else False
+	| Operator (Or, f, p)	-> if deref (evaltonum f) == 1 || deref (evaltonum p) == 1 then True else False
+	| Operator (Not, f, p) 	-> if deref (evaltonum f) == 1 then False else True
+	| Operator (Greater,f,p)-> if deref (evaltonum f) > deref (evaltonum p) then True else False
+	| Operator (Less,f,p)	-> if deref (evaltonum f) < deref (evaltonum p) then True else False
+	| Asg (Identifier x, e) -> let v = deref (evaltonum e) in Hashtbl.replace store x v; Cons v
 	| Seq (f, p)			-> let _ = evaltonum f in
 								let v = evaltonum p in v
-	| If (f, p)				-> if evaltonum f == 1 then evaltonum p else Unit
-	| Identifier x 			-> Hashtbl.find store x
+	| Ifelse (e, p, f)		-> if deref (evaltonum e) == 1 then evaltonum p else evaltonum f
+	| If (f, p)				-> if deref (evaltonum f) == 1 then evaltonum p else Unit
+	| Readint				-> Unit
+	| Printint(e)			-> evaltonum e
+	| Identifier x 			-> Cons (Hashtbl.find store x)
+	| _						-> eprintf "Not implemented"; Unit
 	
+let fundeftonum p =
+	let (s, sl, e) = p in
+	evaltonum e
+
+let rec evaltonumprogram p = 
+	match p with
+	| x :: [] -> string_of_int ( deref (fundeftonum x) )
+	| x :: xs -> string_of_int ( deref (fundeftonum x) ) ^ "\n" ^ evaltonumprogram xs ^ "\n"
 
 let parsewitherror lexbuf =
 	try Par.top Lex.read lexbuf with
@@ -114,9 +138,10 @@ let parsewitherror lexbuf =
 						print_position lexbuf;
 						exit (-1)
 
+(* After parsewitherror we can change between evaltonumprogram or outputprog *)
 let _ = 
-	load_file "tests/bisection.ml"
+	load_file "tests/basic5.ml"
 	|> Lexing.from_string 
 	|> parsewitherror
-	|> outputprog
+	|> evaltonumprogram
 	|> print_string;

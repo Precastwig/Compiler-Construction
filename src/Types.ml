@@ -13,9 +13,6 @@ type expression =
   | Application of expression * expression (* e(e) *)
   | String of string
   | Const of int
-  | Maybe of expression
-  | None
-  | Unit
   | Readint (* read_int () *)
   | Printint of expression (* print_int (e) *)
   | Identifier of string (* x *)

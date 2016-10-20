@@ -1,0 +1,54 @@
+Logical operators:
+	+ 		plus
+	- 		minus
+	/ 		divide
+	* 		times
+	=		equal, this tests equality of two things ( x = x ) is true ( 0 = 1 ) is false
+	!= 		not equal (opposite of equal)
+	>=		greater than or equal
+	<=		less than or equal
+	& 		and
+	|		or
+
+File structure:
+	A program in this language is a list of functions, seperated with ';', the last function does not have a ';' after it
+	
+	For example programs see the test files.
+
+Functions:
+	name (arguments, seperated, with, commas) { /* Code in here is seperated by ';' */ }
+
+Comments:
+	/* Anything inside these will not be evaluated */
+
+Loops and branches:
+	while x do { y }
+		while x evaluates to 1 (or true) y will be repeated.
+	
+	if x do y
+		if x evaluates to 1 (or true) y will run.
+	
+	if x do y else z
+		if x evaluates to 1 (or true) y will run, if x evaluates to anything else, z will run.
+
+Assignment:
+	We can assign a variable a value with ':='
+	e.g. x := 5; 
+	
+	We can assign a value to a variable in a particular expression
+	 let x = 5 in y
+		//THIS CURRENTLY DOES NOT WORK (it will compile, but not functionally do anything)
+
+	We can create a new variable
+	 new x = string in y
+		//THIS CURRENTLY DOES NOT WORK (it will compile, but not functionally do anything)
+
+Dereferencing a variable or expression:
+	p := 4;
+	!p;
+	We currently implicitly dereference so !p == p,
+	This will be changed in future
+
+Reading/Printing
+	read_int();
+	print_int(i);

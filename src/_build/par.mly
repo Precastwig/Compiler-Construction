@@ -32,6 +32,8 @@
 %token LET
 %token IN
 %token NEW
+%token TRUE
+%token FALSE
 
 %left COMMA
 %left SEMICOLON
@@ -69,6 +71,8 @@ args:
 	| l = separated_list( COMMA , STR );		{ l }
 
 exp:
+	| TRUE										{ Types.Const 1 }
+	| FALSE										{ Types.Const 0 }
 	| e = exp; COMMA; p = exp					{ Types.Seq (e, p) } 
 	| e = exp; ASSIGN; p = exp					{ Types.Asg (e, p) }
 	| LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { e }

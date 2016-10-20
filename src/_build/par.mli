@@ -3,6 +3,7 @@
 
 type token = 
   | WHILE
+  | TRUE
   | TIMES
   | STRING of (string)
   | STR of (string)
@@ -24,6 +25,7 @@ type token =
   | IN
   | IF
   | GREATER
+  | FALSE
   | EQUAL
   | EOF
   | ELSE

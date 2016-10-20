@@ -1,0 +1,22 @@
+This file lists all the test files and what they test in the language/compiler
+
+All files should work with the outputprog function in test.ml
+Otherwise it's proper output should be the one seen below.
+
+basic1.ml - Comments, basic operand (+), assignment. 
+	#Should return 10
+basic2.ml - Sequential, other basic operands (-,/), assignment and returning. 
+	#Should return 3
+basic3.ml - if statements. 
+	#Should return 7
+basic4.ml - while loop. 
+	#Should return 7
+basic5.ml - read_int(), print_int(). 
+	#Should return 5
+basic6.ml - let, new. 
+	#Should fail (let and new are not implemented for the evaltonum program)
+
+bisection.ml - a bit of everything. 
+	#Not imperitive so it should fail (or return some random number)
+
+## Felix hiller ##

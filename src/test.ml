@@ -127,7 +127,7 @@ let fundeftonum p =
 let rec evaltonumprogram p = 
 	match p with
 	| x :: [] -> string_of_int ( deref (fundeftonum x) )
-	| x :: xs -> string_of_int ( deref (fundeftonum x) ) ^ "\n" ^ evaltonumprogram xs ^ "\n"
+	| x :: xs -> string_of_int ( deref (fundeftonum x) ) ^ "\n" ^ evaltonumprogram xs
 
 let parsewitherror lexbuf =
 	try Par.top Lex.read lexbuf with
@@ -138,10 +138,48 @@ let parsewitherror lexbuf =
 						print_position lexbuf;
 						exit (-1)
 
-(* After parsewitherror we can change between evaltonumprogram or outputprog *)
-let _ = 
-	load_file "tests/basic5.ml"
+let basicone =
+	(load_file "tests/basic1.ml"
 	|> Lexing.from_string 
 	|> parsewitherror
-	|> evaltonumprogram
+	|> evaltonumprogram)
+
+let basictwo = 
+	(load_file "tests/basic2.ml"
+	|> Lexing.from_string 
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let basicthree = 
+	(load_file "tests/basic3.ml"
+	|> Lexing.from_string 
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let basicfour = 
+	(load_file "tests/basic4.ml"
+	|> Lexing.from_string 
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let basicfive = 
+	(load_file "tests/basic5.ml"
+	|> Lexing.from_string 
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let doalltests =
+	"basic1: " ^ basicone ^ " should be 10\n" ^ 
+	"basic2: " ^ basictwo ^ " should be 3\n" ^
+	"basic3: " ^ basicthree ^ " should be 7\n" ^
+	"basic4: " ^ basicfour ^ " should be 7\n" ^
+	"basic5: " ^ basicfive ^ " should be 5\n"
+	"basic6: is not applicible for this exercise (let and new)\n" ^
+	"bisection: is not applicable for this exercise (not imperitive)\n"
+	
+ 
+
+(* After parsewitherror we can change between evaltonumprogram or outputprog *)
+let _ = 
+	doalltests
 	|> print_string;

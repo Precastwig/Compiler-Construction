@@ -21,6 +21,8 @@ rule read =
 	| wloop { WHILE }
 	| d		{ DO }	
 	| quote { STRING (Lexing.lexeme lexbuf) }
+	| "true" { TRUE }
+	| "false" { FALSE }
 	| "if"	{ IF }
 	| "else"	{ ELSE }
 	| ":="	{ ASSIGN }

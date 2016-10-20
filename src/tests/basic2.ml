@@ -1,11 +1,5 @@
 main () { 
-	x := 3;
-	while (true) do {x := x+2}; 
-	x = 4 
-};
-
-comparisonwithoutbrackets () { 
-	x := 3; 
-	while (true) do {x:= x+2}; 
-	x = 4 
+	if true do p:= 3; 
+	f := 5-5; 
+	p;
 }

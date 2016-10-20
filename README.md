@@ -3,11 +3,11 @@ UoB school work, creating a compiler.
 
 How to compile:
 	Navigate to the directory of the README and call
-		ocamlbuild -use-menhir -use-ocamlfind exp_test.native
+		ocamlbuild -use-menhir -use-ocamlfind test.native
 
 How to run:
 	Call
-		./exp_test.native
+		./test.native
 
 How to change the test run:
 	open exp_test.ml in your favourite editor, then scroll to the bottom,
@@ -50,7 +50,7 @@ Syntax:
 	Dereferencing an expression:
 		!( .. ) will dereference an expression
 	Application of a function:
-		functionone(parameter1, parameter2)		//Again i wasn't sure what you meant by an application of an expression (this seems nonsensical?) So i changed to a function application with a single parameter
+		functionone(parameter1, parameter2)
 	Reading/printing:
 		read_int()
 		print_int( .. ) 

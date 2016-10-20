@@ -1,0 +1,33 @@
+### Starting build.
+# Target: test.ml.depends, tags: { extension:ml, file:test.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules test.ml > test.ml.depends
+# Target: lex.mll, tags: { extension:mll, file:lex.mll, lexer, ocaml, ocamllex, quiet }
+/home/precastwig/.opam/4.02.1/bin/ocamllex.opt -q lex.mll # cached
+# Target: lex.ml.depends, tags: { extension:ml, file:lex.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules lex.ml > lex.ml.depends # cached
+# Target: par.mly.depends, tags: { extension:mly, file:par.mly, menhir_ocamldep, ocaml, ocamldep, quiet }
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' par.mly > par.mly.depends # cached
+# Target: Types.ml.depends, tags: { extension:ml, file:Types.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Types.ml > Types.ml.depends # cached
+# Target: Types.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Types.cmo, file:Types.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o Types.cmo Types.ml # cached
+# Target: par.mly, tags: { byte, compile, extension:mly, file:par.mly, menhir, ocaml, parser, quiet }
+menhir --ocamlc 'ocamlfind ocamlc' --infer par.mly # cached
+# Target: par.mli.depends, tags: { extension:mli, file:par.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules par.mli > par.mli.depends # cached
+# Target: par.cmi, tags: { byte, compile, extension:mli, file:par.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o par.cmi par.mli # cached
+# Target: lex.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:lex.cmo, file:lex.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o lex.cmo lex.ml # cached
+# Target: test.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:test.cmo, file:test.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o test.cmo test.ml
++ ocamlfind ocamlc -c -o test.cmo test.ml
+File "test.ml", line 41, characters 1-1230:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(String _|Maybe _|None|Unit)
+File "test.ml", line 104, characters 61-65:
+Error: This expression has type Types.expression
+       but an expression was expected of type int
+Command exited with code 2.
+# Compilation unsuccessful.

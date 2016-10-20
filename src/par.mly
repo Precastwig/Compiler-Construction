@@ -70,7 +70,7 @@ args:
 
 exp:
 	| e = exp; COMMA; p = exp					{ Types.Seq (e, p) } 
-	| s = STR; ASSIGN; p = exp					{ Types.Asg (s, p) }
+	| e = exp; ASSIGN; p = exp					{ Types.Asg (e, p) }
 	| LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { e }
 	| LEFTBRACE; e = exp; RIGHTBRACE			{ e }
 	| e = exp; SEMICOLON; p = exp				{ Types.Seq (e, p) }
@@ -92,8 +92,8 @@ exp:
 	| e = exp; OR; p = exp 				{ Types.Operator (Or, e, p) }
 	| e = exp; NOT; p = exp 				{ Types.Operator (Not, e, p) }
 	| i = INT									{ Types.Const i }
+	| s = STRING								{ Types.String s }
 	| s = STR									{ Types.Identifier s }
-	| s = STRING								{ Types.String s } 
 	| NOT; e = exp								{ Types.Deref e }
 	| e = exp; LEFTROUNDBRACKET; p = exp; RIGHTROUNDBRACKET { Types.Application (e, p) }
 	| READINT; LEFTROUNDBRACKET; RIGHTROUNDBRACKET { Types.Readint }

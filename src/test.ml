@@ -1,6 +1,7 @@
 open Types
-open Exp_lex
+open Lex
 open Lexing
+open Hashtbl
 open Printf
 
 let rec read_to_empty buf = 
@@ -42,7 +43,7 @@ let rec printexp e i=
 	| While (f, p) 		-> 	printi i ^ "While of (\n" 		^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
 	| Ifelse (f, p, q)	-> 	printi i ^ "Ifelse of (\n" 		^ printexp f i ^ ",\n" ^ printexp p i ^ ",\n" ^ printexp q i ^ ")"
 	| If (f, p)			->	printi i ^ "If of (\n" 			^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
-	| Asg (s, p) 		-> 	printi i ^ "Assignment of (\n" 	^ printi (i+4) ^ s ^ ",\n" ^ printexp p i ^ ")"
+	| Asg (s, p) 		-> 	printi i ^ "Assignment of (\n" 	^ printexp s i ^ ",\n" ^ printexp p i ^ ")"
 	| Deref f			->	printi i ^ "Dereference of \n" 	^ printexp f i
 	| Operator (o, f, p)-> 	printi i ^ "Operator of (\n" 	^ printexp f i ^ ",\n" ^ printopcode o (i+4) ^ ",\n" ^ printexp p i ^ ")"
 	| Application (f, p)-> 	printi i ^ "Application of (\n" 	^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
@@ -50,7 +51,6 @@ let rec printexp e i=
 	| Readint 			-> 	printi i ^ "Readint"
 	| Printint f 		->	printi i ^ "print_int of " 		^ printexp f i
 	| Identifier s		-> 	printi i ^ "Identifier of " 	^ s
-	| String s 			->  printi i ^ "String of " 		^ s
 	| Let (s, f, p)		-> 	printi i ^ "Let of (\n" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
 	| New (s, f, p)		-> 	printi i ^ "New of (\n" 			^ s ^ ",\n" ^ printexp f i ^ ",\n" ^ printexp p i ^ ")"
 
@@ -70,7 +70,7 @@ let outputprog prog = "[" ^ printlistfunctions prog ^ "]" ^ "\n"
 let load_file f =
 	let ic = open_in f in
 	let n = in_channel_length ic in
-	let s = String.create n in
+	let s = Bytes.create n in
 	really_input ic s 0 n;
 	close_in ic;
 	(s)
@@ -79,17 +79,43 @@ let print_position lexbuf =
 	let pos = lexbuf.lex_curr_p in
 	eprintf "Pos %d:%d:%d\n" pos.pos_lnum pos.pos_bol pos.pos_cnum
 
+let store = Hashtbl.create 100
+
+let rec evaltonum e =
+	match e with
+	| Seq (f, p)			-> let _ = evaltonum f in evaltonum p
+	| Const x 				-> x
+	| Operator (Plus, f, p)	-> evaltonum f + evaltonum p
+	| Operator (Minus, f, p)-> evaltonum f - evaltonum p
+	| Operator (Times, f, p)-> evaltonum f * evaltonum p
+	| Operator (Divide, f,p)-> evaltonum f / evaltonum p
+	| Operator (Leq,f, p)	-> if evaltonum f <= evaltonum p then 1 else 0
+	| Operator (Geq,f, p)	-> if evaltonum f >= evaltonum p then 1 else 0
+	| Operator (Equal,f,p)	-> if evaltonum f == evaltonum p then 1 else 0
+	| Operator (Noteq,f,p)	-> if evaltonum f != evaltonum p then 1 else 0
+	| Operator (And,f,p)	-> if evaltonum f == 1 && evaltonum p == 1 then 1 else 0
+	| Operator (Or, f, p)	-> if evaltonum f == 1 || evaltonum p == 1 then 1 else 0
+	| Operator (Not, f, p) 	-> if evaltonum f == 1 then 0 else 1
+	| Operator (Greater,f,p)-> if evaltonum f > evaltonum p then 1 else 0
+	| Operator (Less,f,p)	-> if evaltonum f < evaltonum p then 1 else 0
+	| Asg (Identifier x, e) -> let v = evaltonum e in Hashtbl.replace store x v; v
+	| Seq (f, p)			-> let _ = evaltonum f in
+								let v = evaltonum p in v
+	| If (f, p)				-> if evaltonum f == 1 then evaltonum p else Unit
+	| Identifier x 			-> Hashtbl.find store x
+	
+
 let parsewitherror lexbuf =
-	try Exp_par.top Exp_lex.read lexbuf with
+	try Par.top Lex.read lexbuf with
 	| SyntaxError msg -> prerr_string (msg ^ ": ");
 						print_position lexbuf;
 						exit (-1)
-	| Exp_par.Error -> prerr_string "Parse error: ";
+	| Par.Error -> prerr_string "Parse error: ";
 						print_position lexbuf;
 						exit (-1)
 
 let _ = 
-	load_file "bisection.ml"
+	load_file "tests/bisection.ml"
 	|> Lexing.from_string 
 	|> parsewitherror
 	|> outputprog

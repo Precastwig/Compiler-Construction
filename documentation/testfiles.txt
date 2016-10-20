@@ -19,4 +19,16 @@ basic6.ml - let, new.
 bisection.ml - a bit of everything. 
 	#Not imperitive so it should fail (or return some random number)
 
+numtest1.ml - simple addition into no var
+	#Should be 10
+numtest2.ml - Assignment into variable then implicit dereference
+	#Should be 4
+numtest3.ml - Implicit dereference of a uninitialized variable, because the tests are all compiled together the dereference should be whatever last test used the variable x
+	#Should be 2 (usually 0 though, dependent on what else has happened)
+numtest4.ml - While loop with true and false
+	#Should be 7
+
+fibonacci.ml - gives the fibonacci number of index x (which is 5)
+	#Should be 5
+
 ## Felix hiller ##

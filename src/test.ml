@@ -11,6 +11,8 @@ let rec read_to_empty buf =
 			Buffer.add_string buf "\n";
 			read_to_empty buf)
 
+(*These functions print a type of program*)
+
 let rec printi i = if i > 0 then " " ^ printi (i-1) else ""
 
 let rec stringlist sl =
@@ -64,9 +66,10 @@ let rec printlistfunctions l =
 	| x :: [] -> "function (" ^ printfunc x ^ ")\n"
 	| x :: xs -> "function (" ^ printfunc x ^ "),\n" ^ printlistfunctions xs
 	
-
+(*This is the main function that prints a type of program*)
 let outputprog prog = "[" ^ printlistfunctions prog ^ "]" ^ "\n"
 
+(*Code that loads a file *)
 let load_file f =
 	let ic = open_in f in
 	let n = in_channel_length ic in
@@ -75,12 +78,14 @@ let load_file f =
 	close_in ic;
 	(s)
 
+(*Error handling position code*)
 let print_position lexbuf =
 	let pos = lexbuf.lex_curr_p in
 	eprintf "Pos %d:%d:%d\n" pos.pos_lnum pos.pos_bol pos.pos_cnum
 
 let store = Hashtbl.create 100
 
+(*This code evaluates a type of program to an integer*)
 type maybe = 
 	| Cons of int
 	| True
@@ -91,7 +96,7 @@ let deref e =
 	match e with
 	| Cons x -> x
 	| True -> 1
-	| False -> 0	
+	| False -> 0
 
 let rec evaltonum e =
 	match e with
@@ -115,6 +120,7 @@ let rec evaltonum e =
 								let v = evaltonum p in v
 	| Ifelse (e, p, f)		-> if deref (evaltonum e) == 1 then evaltonum p else evaltonum f
 	| If (f, p)				-> if deref (evaltonum f) == 1 then evaltonum p else Unit
+	| While (f, p)			-> if deref (evaltonum f) == 1 then let k = evaltonum p in evaltonum (While (f, p)) 																			else Unit
 	| Readint				-> Unit
 	| Printint(e)			-> evaltonum e
 	| Identifier x 			-> Cons (Hashtbl.find store x)
@@ -138,6 +144,7 @@ let parsewitherror lexbuf =
 						print_position lexbuf;
 						exit (-1)
 
+(*This code runs the tests for the program*)
 let basicone =
 	(load_file "tests/basic1.ml"
 	|> Lexing.from_string 
@@ -168,15 +175,51 @@ let basicfive =
 	|> parsewitherror
 	|> evaltonumprogram)
 
+let fibonacci = 
+	(load_file "tests/fibonacci.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let numtestone = 
+	(load_file "tests/numtest1.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let numtesttwo = 
+	(load_file "tests/numtest2.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let numtestthree = 
+	(load_file "tests/numtest3.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evaltonumprogram)
+
+let numtestfour = 
+	(load_file "tests/numtest4.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evaltonumprogram)
+
+
+
 let doalltests =
 	"basic1: " ^ basicone ^ " should be 10\n" ^ 
 	"basic2: " ^ basictwo ^ " should be 3\n" ^
 	"basic3: " ^ basicthree ^ " should be 7\n" ^
 	"basic4: " ^ basicfour ^ " should be 7\n" ^
-	"basic5: " ^ basicfive ^ " should be 5\n"
+	"basic5: " ^ basicfive ^ " should be 5\n" ^
 	"basic6: is not applicible for this exercise (let and new)\n" ^
-	"bisection: is not applicable for this exercise (not imperitive)\n"
-	
+	"bisection: is not applicable for this exercise (not imperitive)\n" ^
+	"numtest1: " ^ numtestone ^ " should be 10\n" ^
+	"numtest2: " ^ numtesttwo ^ " should be 4\n" ^
+	"numtest3: " ^ numtestthree ^ " no clue \n" ^
+	"numtest4: " ^ numtestfour ^ " should be 7\n" ^
+	"fibonacci: " ^ fibonacci ^ " should be 5\n"
  
 
 (* After parsewitherror we can change between evaltonumprogram or outputprog *)

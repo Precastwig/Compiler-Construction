@@ -1,6 +1,6 @@
-main (i) {
+fibonacci (k) {
 	/*This is the number element of the fibonacci sequence to compute*/
-	var x = 5 in
+	var x = k in
 	
 	/*This is the code to evaluate the fibonacci sequence*/
 	var p = 1 in
@@ -13,8 +13,7 @@ main (i) {
 	};
 	@f;
 };
-(*
+
 main () {
-	var p = 4 in
-	@p
-};*)
+	fibonacci(10)
+};

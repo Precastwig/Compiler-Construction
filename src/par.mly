@@ -86,6 +86,7 @@ exp:
 	| LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { e }
 	| LEFTBRACE; e = exp; RIGHTBRACE			{ e }
 	| e = exp; SEMICOLON; p = exp				{ Types.Seq (e, p) }
+	| e = exp; COMMA; p = exp				{ Types.Seq (e, p) }
 	| e = exp; SEMICOLON;						{ e }
 	| WHILE; e = exp; DO; LEFTBRACE; p = exp; RIGHTBRACE { Types.While (e, p) }
 	| IF; e = exp; DO; p = exp;					{ Types.If (e, p) }

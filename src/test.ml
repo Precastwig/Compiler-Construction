@@ -102,6 +102,14 @@ let string_repeat str x =
 	done;
 	Bytes.to_string res
 	
+let rec maybetostr f =
+	match f with
+		| Mstring s -> s
+		| Cons x 	-> string_of_int x 
+		| Mtrue 	-> "true"
+		| Mfalse	-> "false"
+		| Unit		-> "unit"
+	
 let tobool e = 
 	match e with
 	| Cons x -> if x = 0 then false else true
@@ -123,6 +131,7 @@ let lookup i store =
 											| e -> raise e )
 
 let rec evalexplist env store e = 
+	printf "%s" (printexp e 0);
 	match e with
 	| Const x -> [Cons x]
 	| True 	 -> [Mtrue]
@@ -131,6 +140,7 @@ let rec evalexplist env store e =
 	| Identifier x 			-> [lookup (Identifier x) env]
 	| Deref (Identifier e) 	-> [lookup (Identifier e) store]
 	| Seq(f, s) -> List.rev_append (evalexplist env store f) (evalexplist env store s)
+	| _	-> eprintf "Error with argument type\n"; []
 
 let rec printfl fl =
 	match fl with
@@ -339,7 +349,13 @@ let rec evalexp env store e fl =
 								!r
 
 	| Application (Identifier id, args) 		-> let (sl, exp) = findfunc fl id in
-								argsexpcreate env (evalexplist env store args) sl;
+								printf "Application %s\n" (printexp args 0);
+								let k = (evalexplist env store args) in
+								let rec flatten l = (match l with
+												| [] -> ""
+												| x :: xs -> maybetostr x ^ " " ^ flatten xs) in 
+								printf "After evalexplist %s" (flatten k);
+								argsexpcreate env k sl;
 								evalexp env store exp fl
 
 	| Readint				-> Unit
@@ -347,14 +363,6 @@ let rec evalexp env store e fl =
 	| Identifier x 			-> lookup (Identifier x) env
 	| Deref (Identifier e) 	-> lookup (Identifier e) store
 	| _						-> eprintf "Not implemented"; Unit )
-
-let rec maybetostr f =
-	match f with
-		| Mstring s -> s
-		| Cons x 	-> string_of_int x 
-		| Mtrue 	-> "true"
-		| Mfalse	-> "false"
-		| Unit		-> "unit"
 
 let rec storefuncs fl plc =
 	match fl with
@@ -424,7 +432,7 @@ let numtesttwo =
 	|> evalexpprogram)
 (*
 let numtestthree = 
-	(load_file "tests/numtest3.ml"
+	(load_file "tests/numtest3.ml"	
 	|> Lexing.from_string
 	|> parsewitherror
 	|> evalexpprogram)
@@ -435,6 +443,17 @@ let numtestfour =
 	|> parsewitherror
 	|> evalexpprogram)
 
+let alltypeone =
+	(load_file "tests/alltypes1.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evalexpprogram)
+	
+let alltypetwo =
+	(load_file "tests/alltype2.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evalexpprogram)
 
 let doalltests =
 	"basic1: " ^ basicone ^ " should be 10\n" ^
@@ -446,7 +465,9 @@ let doalltests =
 	"numtest1: " ^ numtestone ^ " should be 10\n" ^
 	"numtest2: " ^ numtesttwo ^ " should be 4\n" ^
 	"numtest3: " ^ "beep boop didn't work" ^ " should be error\n" ^
-	"numtest4: " ^ numtestfour ^ " should be 7\n"
+	"numtest4: " ^ numtestfour ^ " should be 7\n" ^
+	"alltype1: " ^ alltypeone ^ " should be 12\n" ^ 
+	"alltype2: " ^ alltypetwo ^ " should be 10\n"
 
 (* After parsewitherror we can change between evalexpprogram or outputprog *)
 let _ = 

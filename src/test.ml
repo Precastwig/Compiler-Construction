@@ -131,7 +131,7 @@ let lookup i store =
 											| e -> raise e )
 
 let rec evalexplist env store e = 
-	printf "%s" (printexp e 0);
+	(*printf "%s" (printexp e 0);*)
 	match e with
 	| Const x -> [Cons x]
 	| True 	 -> [Mtrue]
@@ -349,12 +349,12 @@ let rec evalexp env store e fl =
 								!r
 
 	| Application (Identifier id, args) 		-> let (sl, exp) = findfunc fl id in
-								printf "Application %s\n" (printexp args 0);
+							(*	printf "Application %s\n" (printexp args 0); *)
 								let k = (evalexplist env store args) in
-								let rec flatten l = (match l with
+							(*	let rec flatten l = (match l with
 												| [] -> ""
 												| x :: xs -> maybetostr x ^ " " ^ flatten xs) in 
-								printf "After evalexplist %s" (flatten k);
+								printf "After evalexplist %s" (flatten k); *)
 								argsexpcreate env k sl;
 								evalexp env store exp fl
 
@@ -455,6 +455,20 @@ let alltypetwo =
 	|> parsewitherror
 	|> evalexpprogram)
 
+(*
+	
+let alltypethree =
+	(load_file "tests/alltype3.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evalexpprogram) *)
+
+let alltypefour =
+	(load_file "tests/alltype4.ml"
+	|> Lexing.from_string
+	|> parsewitherror
+	|> evalexpprogram)
+	
 let doalltests =
 	"basic1: " ^ basicone ^ " should be 10\n" ^
 	"basic2: " ^ basictwo ^ " should be 3\n" ^
@@ -467,7 +481,8 @@ let doalltests =
 	"numtest3: " ^ "beep boop didn't work" ^ " should be error\n" ^
 	"numtest4: " ^ numtestfour ^ " should be 7\n" ^
 	"alltype1: " ^ alltypeone ^ " should be 12\n" ^ 
-	"alltype2: " ^ alltypetwo ^ " should be 10\n"
+	"alltype2: " ^ alltypetwo ^ " should be 10\n" ^
+	"alltype4: " ^ alltypefour ^ " should print 120 then 5 then 120 returning 120\n"
 
 (* After parsewitherror we can change between evalexpprogram or outputprog *)
 let _ = 

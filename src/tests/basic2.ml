@@ -1,5 +1,5 @@
 main () { 
-	if true do p:= 3; 
+	var p = if true do 3 else 2 in
 	f := 5-5; 
-	p;
-}
+	@p;
+};

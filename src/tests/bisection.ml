@@ -21,4 +21,8 @@ recursive (f,a,b,TOL,NMAX,n) {
 		};
 		recursive(f,a,b,TOL,NMAX,(n+1))
 	}
-}
+};
+
+main () {
+	
+};

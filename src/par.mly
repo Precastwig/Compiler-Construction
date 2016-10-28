@@ -34,9 +34,12 @@
 %token NEW
 %token TRUE
 %token FALSE
+%token AT
+%token MAIN
 
 %left COMMA
 %left SEMICOLON
+%left STR
 
 %left WHILE DO 
 %left IF
@@ -57,23 +60,28 @@
 %left DIVIDE
 %left TIMES
 
+%left AT
 %left NOT
 %left LEFTROUNDBRACKET  /* high precedence */
 %start <Types.program> top
 %%
 top:
-	| el = separated_list( SEMICOLON , fundef ); EOF		{ el }
+	| fl = separated_list( SEMICOLON , fundef ); m = maindef; SEMICOLON; EOF { ( m , fl)  }
+	| f = fundef; SEMICOLON; m = maindef; SEMICOLON; EOF 	{  (m, [f]) }
+	| m = maindef; SEMICOLON; EOF					{ (m , []) }
+
+maindef:
+	| MAIN;  LEFTROUNDBRACKET; a = args; RIGHTROUNDBRACKET; LEFTBRACE; f = exp; RIGHTBRACE 	{ Types.Main ( a, f) }
 
 fundef:
-	| s = STR; LEFTROUNDBRACKET; a = args; RIGHTROUNDBRACKET; LEFTBRACE; f = exp; RIGHTBRACE 	{ (s, a, f) }
+	| s = STR; LEFTROUNDBRACKET; a = args; RIGHTROUNDBRACKET; LEFTBRACE; f = exp; RIGHTBRACE 	{ Types.Fun (s, a, f) }
 
 args:
 	| l = separated_list( COMMA , STR );		{ l }
 
 exp:
-	| TRUE										{ Types.Const 1 }
-	| FALSE										{ Types.Const 0 }
-	| e = exp; COMMA; p = exp					{ Types.Seq (e, p) } 
+	| TRUE										{ Types.True }
+	| FALSE										{ Types.False } 
 	| e = exp; ASSIGN; p = exp					{ Types.Asg (e, p) }
 	| LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { e }
 	| LEFTBRACE; e = exp; RIGHTBRACE			{ e }
@@ -82,6 +90,7 @@ exp:
 	| WHILE; e = exp; DO; LEFTBRACE; p = exp; RIGHTBRACE { Types.While (e, p) }
 	| IF; e = exp; DO; p = exp;					{ Types.If (e, p) }
 	| IF; e = exp; DO; p = exp; ELSE; f = exp 	{ Types.Ifelse (e, p, f) }
+
 	| e = exp; PLUS; p = exp 				{ Types.Operator (Plus, e, p) }
 	| e = exp; MINUS; p = exp 				{ Types.Operator (Minus, e, p) }
 	| e = exp; TIMES; p = exp 				{ Types.Operator (Times, e, p) }
@@ -94,12 +103,16 @@ exp:
 	| e = exp; NOT; EQUAL; p = exp 				{ Types.Operator (Noteq, e, p) }
 	| e = exp; AND; p = exp 				{ Types.Operator (And, e, p) }
 	| e = exp; OR; p = exp 				{ Types.Operator (Or, e, p) }
-	| e = exp; NOT; p = exp 				{ Types.Operator (Not, e, p) }
+
+	| NOT; p = exp 				{ Types.Not p }
+
 	| i = INT									{ Types.Const i }
 	| s = STRING								{ Types.String s }
 	| s = STR									{ Types.Identifier s }
-	| NOT; e = exp								{ Types.Deref e }
+	| AT; e = exp								{ Types.Deref e }
+
 	| e = exp; LEFTROUNDBRACKET; p = exp; RIGHTROUNDBRACKET { Types.Application (e, p) }
+
 	| READINT; LEFTROUNDBRACKET; RIGHTROUNDBRACKET { Types.Readint }
 	| PRINTINT; LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { Types.Printint (e) }
 	| LET; s = STR; EQUAL; e = exp; IN; f = exp	{ Types.Let (s, e, f) }

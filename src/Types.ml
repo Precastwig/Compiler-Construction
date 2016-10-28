@@ -1,3 +1,9 @@
+type maybe = 
+	| Cons of int
+	| Mstring of string
+	| Mtrue
+	| Mfalse
+	| Unit
 type opcode =
   | Plus | Minus | Times | Divide
   | Leq | Geq | Equal | Noteq
@@ -10,7 +16,11 @@ type expression =
   | Asg of expression * expression (* e := e *)
   | Deref of expression (* !e *)
   | Operator of opcode * expression * expression (* e + e *)
+  | Not of expression
   | Application of expression * expression (* e(e) *)
+  | True
+  | False
+  | Ref of maybe
   | String of string
   | Const of int
   | Readint (* read_int () *)
@@ -18,5 +28,6 @@ type expression =
   | Identifier of string (* x *)
   | Let of string * expression * expression (* let x = e in e *)
   | New of string * expression * expression (* new x = e in e *)
-type fundef = string * string list * expression
-type program = fundef list
+type fundef = Fun of string * string list * expression
+type maindef = Main of string list * expression
+type program = maindef * fundef list

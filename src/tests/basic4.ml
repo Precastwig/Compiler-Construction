@@ -1,7 +1,7 @@
 main () { 
-	x := 3;
-	while (x = 3) do {
-		x:=x+4	
+	var y = 3 in
+	while (@y = 3) do {
+		y:=@y+4	
 	};
-	x;
-}
+	@y;
+};

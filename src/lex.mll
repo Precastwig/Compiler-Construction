@@ -8,7 +8,7 @@ let wloop = "while"
 let d = "do"
 let white = [' ' '\t']+
 let str = ['a'-'z' 'A'-'Z' '_' '0'-'9'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
-let comment = "/*" (str | '\n'| '\r' | "\r\n" | ' ' | '(' | ')' | '{' | '}' | '=' | ',' | ';' | '|' | '<' | '>' | '/' | '+' | '*' | '-' | '!' | ':' | '/')* "*/"
+let comment = "/*" (str | '\n'| '\r' | "\r\n" | ' ' | '(' | ')' | '{' | '}' | '=' | ',' | ';' | '|' | '<' | '>' | '/' | '+' | '*' | '@' | '-' | '!' | ':' | '/')* "*/"
 let quote = "\"" ['a'-'z' 'A'-'Z' '_' '0'-'9' ' ' '.' ',' ';' '@' '#']* "\""
 let newline = '\r' | '\n' | "\r\n"
 
@@ -21,6 +21,7 @@ rule read =
 	| wloop { WHILE }
 	| d		{ DO }	
 	| quote { STRING (Lexing.lexeme lexbuf) }
+	| "main" { MAIN }
 	| "true" { TRUE }
 	| "false" { FALSE }
 	| "if"	{ IF }
@@ -30,7 +31,7 @@ rule read =
 	| "print_int" { PRINTINT }
 	| "let"	{ LET }
 	| "in"	{ IN }
-	| "new"	{ NEW }
+	| "var"	{ NEW }
 	| str	{ STR (Lexing.lexeme lexbuf) }
 	| '{'	{ LEFTBRACE }
 	| '}'	{ RIGHTBRACE }
@@ -47,6 +48,7 @@ rule read =
 	| '-'	{ MINUS }
 	| '/'	{ DIVIDE }
 	| '*' 	{ TIMES }
+	| '@'	{ AT }
 	| '!'	{ NOT }
 	| _		{ raise (SyntaxError ("Unexpected char: ")) }
 	| eof 	{ EOF }

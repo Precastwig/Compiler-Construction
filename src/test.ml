@@ -15,7 +15,7 @@ let rec read_to_empty buf =
 
 let rec printi i = if i > 0 then " " ^ printi (i-1) else ""
 
-let functionlist = Hashtbl.create 100
+let functionlist = []
 
 let rec stringlist sl =
 	match sl with
@@ -132,14 +132,24 @@ let rec evalexplist env store e =
 	| Deref (Identifier e) 	-> [lookup (Identifier e) store]
 	| Seq(f, s) -> List.rev_append (evalexplist env store f) (evalexplist env store s)
 
-let rec evalexp env store e =
+let rec printfl fl =
+	match fl with
+	| [] -> "fin\n"
+	| Fun (s, sl, exp) :: xs -> s ^ "\n" ^ printfl xs
+
+let rec findfunc fl n =
+	match fl with
+	| [] -> eprintf "Error, function does not exist\n"; ([],Ref Unit)
+	| Fun (s, sl, exp) :: xs -> if s = n then (sl, exp) else findfunc xs n
+
+let rec evalexp env store e fl =
 	(match e with
 	| Const x	 			-> Cons x
 	| True					-> Mtrue
 	| False					-> Mfalse
 	| String s				-> Mstring s
-	| Operator (Plus, f, p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Plus, f, p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> Cons ( x + y )
@@ -150,8 +160,8 @@ let rec evalexp env store e =
 												| Mstring y	-> Mstring ( x ^ y )
 												| _			-> eprintf "Plus Not implemented"; Unit )
 								| _ 		-> eprintf "Plus Not implemented"; Unit )
-	| Operator (Minus, f, p)-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Minus, f, p)-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> Cons ( x - y )
@@ -162,8 +172,8 @@ let rec evalexp env store e =
 												| Mstring y	-> eprintf "Minus Not implemented"; Unit
 												| _			-> eprintf "Minus Not implemented"; Unit )
 								| _ 		-> eprintf "Minus Not implemented"; Unit )
-	| Operator (Times, f, p)-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Times, f, p)-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> Cons ( x * y )
@@ -174,8 +184,8 @@ let rec evalexp env store e =
 												| Mstring y	-> Mstring ( x ^ y )
 												| _			-> eprintf "Times Not implemented"; Unit )
 								| _ 		-> eprintf "Times Not implemented"; Unit )
-	| Operator (Divide, f,p)-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Divide, f,p)-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> Cons ( x / y )
@@ -186,8 +196,8 @@ let rec evalexp env store e =
 												| Mstring y	-> eprintf "Divide Not implemented"; Unit
 												| _			-> eprintf "Divide Not implemented"; Unit )
 								| _ 		-> eprintf "Divide Not implemented"; Unit )
-	| Operator (Leq,f, p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Leq,f, p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> if x <= y then Mtrue else Mfalse
@@ -198,8 +208,8 @@ let rec evalexp env store e =
 												| Mstring y	-> eprintf "Leq Not implemented"; Unit
 												| _			-> eprintf "Leq Not implemented"; Unit )
 								| _ 		-> eprintf "Leq Not implemented"; Unit )
-	| Operator (Geq,f, p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Geq,f, p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> if x >= y then Mtrue else Mfalse
@@ -210,8 +220,8 @@ let rec evalexp env store e =
 												| Mstring y	-> eprintf "Geq Not implemented"; Unit
 												| _			-> eprintf "Geq Not implemented"; Unit )
 								| _ 		-> eprintf "Geq Not implemented"; Unit )
-	| Operator (Equal,f,p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Equal,f,p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> if x = y then Mtrue else Mfalse
@@ -222,8 +232,8 @@ let rec evalexp env store e =
 												| Mstring y	-> if x = y then Mtrue else Mfalse
 												| _			-> eprintf "Eq Not implemented"; Unit )
 								| _ 		-> eprintf "Eq Not implemented"; Unit )
-	| Operator (Noteq,f,p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Noteq,f,p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> if x != y then Mtrue else Mfalse
@@ -234,8 +244,8 @@ let rec evalexp env store e =
 												| Mstring y	-> if x != y then Mtrue else Mfalse
 												| _			-> eprintf "NotEq Not implemented"; Unit )
 								| _ 		-> eprintf "NotEq Not implemented"; Unit )
-	| Operator (And,f,p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (And,f,p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Mtrue -> ( match j with 
 											| Mtrue 	-> Mtrue
@@ -246,8 +256,8 @@ let rec evalexp env store e =
 												| Mfalse	-> Mfalse
 												| _			-> eprintf "And Not implemented"; Unit )
 								| _ 		-> eprintf "And Not implemented"; Unit )
-	| Operator (Or, f, p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Or, f, p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Mtrue		-> ( match j with 
 											| Mtrue 	-> Mtrue
@@ -258,7 +268,7 @@ let rec evalexp env store e =
 												| Mfalse	-> Mfalse
 												| _			-> eprintf "Or Not implemented"; Unit )
 								| _ 		-> eprintf "Or Not implemented"; Unit )
-	| Not f				 	-> let k = evalexp env store f in
+	| Not f				 	-> let k = evalexp env store f fl in
 								( match k with
 								| Mtrue		-> Mfalse 
 								| Mstring s	-> ( match s with
@@ -269,8 +279,8 @@ let rec evalexp env store e =
 													| _		-> eprintf "Not Not implemented"; Unit )
 								| Mfalse	-> Mtrue
 								| _ 		-> eprintf "Not Not implemented"; Unit )
-	| Operator (Greater,f,p)-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Greater,f,p)-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> if x > y then Mtrue else Mfalse
@@ -281,8 +291,8 @@ let rec evalexp env store e =
 												| Mstring y	-> if x > y then Mtrue else Mfalse
 												| _			-> eprintf "Greater Not implemented"; Unit )
 								| _ 		-> eprintf "Greater Not implemented"; Unit )
-	| Operator (Less,f,p)	-> let k = evalexp env store f in
-								let j = evalexp env store p in
+	| Operator (Less,f,p)	-> let k = evalexp env store f fl in
+								let j = evalexp env store p fl in
 								( match k with
 								| Cons x -> ( match j with 
 											| Cons y 	-> if x < y then Mtrue else Mfalse
@@ -294,48 +304,46 @@ let rec evalexp env store e =
 												| _			-> eprintf "Less Not implemented"; Unit )
 								| _ 		-> eprintf "Less Not implemented"; Unit )
 
-	| Asg (Identifier x, e) -> let rhs = (evalexp env store e) in Hashtbl.add store x rhs; rhs
+	| Asg (Identifier x, e) -> let rhs = (evalexp env store e fl) in Hashtbl.add store x rhs; rhs
 
-	| Let (x, e, f)			-> let v = evalexp env store e in 
+	| Let (x, e, f)			-> let v = evalexp env store e fl in 
 								Hashtbl.add env x v;
-								let k = evalexp env store f in
+								let k = evalexp env store f fl in
 								Hashtbl.remove env x; k
 
-	| New (x, e, f)			-> let v = evalexp env store e in
+	| New (x, e, f)			-> let v = evalexp env store e fl in
 								Hashtbl.add store x v;
-								evalexp env store f
+								evalexp env store f fl
 								
-	| Seq (f, p)			-> let _ = evalexp env store f in
-								let v = evalexp env store p in v
+	| Seq (f, p)			-> let _ = evalexp env store f fl in
+								let v = evalexp env store p fl in v
 
-	| Ifelse (e, p, f)		-> let ee = evalexp env store e in
+	| Ifelse (e, p, f)		-> let ee = evalexp env store e fl in
 								( match ee with
-								| Cons x -> if x = 1 then evalexp env store p else evalexp env store f
-								| Mtrue -> evalexp env store p
-								| Mfalse -> evalexp env store f
+								| Cons x -> if x = 1 then evalexp env store p fl else evalexp env store f fl
+								| Mtrue -> evalexp env store p fl
+								| Mfalse -> evalexp env store f fl
 								| _		-> eprintf "Not implemented"; Unit ) 
 
-	| If (f, p)				-> let ee = evalexp env store f in
+	| If (f, p)				-> let ee = evalexp env store f fl in
 								( match ee with
-								| Cons x -> if x = 1 then evalexp env store p else Unit
-								| Mtrue -> evalexp env store p
+								| Cons x -> if x = 1 then evalexp env store p fl else Unit
+								| Mtrue -> evalexp env store p fl
 								| Mfalse -> Unit
 								| _		-> eprintf "Not implemented"; Unit ) 
 
 	| While (f, p)			-> let r = ref Unit in
-								while tobool (evalexp env store f) do
-									r := evalexp env store p
+								while tobool (evalexp env store f fl) do
+									r := evalexp env store p fl
 								done;
 								!r
 
-	| Application (id, args) 		-> let (sl, exp) = (try Hashtbl.find functionlist id with
-											| Not_found -> eprintf "Functio '%s' is not defined\n" (printexp id 0); ([],Ref Unit)
-											| e -> raise e) in
+	| Application (Identifier id, args) 		-> let (sl, exp) = findfunc fl id in
 								argsexpcreate env (evalexplist env store args) sl;
-								evalexp env store exp
+								evalexp env store exp fl
 
 	| Readint				-> Unit
-	| Printint(e)			-> let k = evalexp env store e in printf "%d\n" (maybetoint k); k
+	| Printint(e)			-> let k = evalexp env store e fl in printf "%d\n" (maybetoint k); k
 	| Identifier x 			-> lookup (Identifier x) env
 	| Deref (Identifier e) 	-> lookup (Identifier e) store
 	| _						-> eprintf "Not implemented"; Unit )
@@ -348,19 +356,14 @@ let rec maybetostr f =
 		| Mfalse	-> "false"
 		| Unit		-> "unit"
 
-let fundeftonum p =
-	let (s, sl, e) = p in
-	evalexp (Hashtbl.create 100) (Hashtbl.create 100) e
-
 let rec storefuncs fl plc =
 	match fl with
 	| [] -> ()
 	| ( s, sl, exp ) :: xs -> Hashtbl.add plc s (sl, exp); storefuncs xs plc
 
 let rec evalexpprogram p =
-	let ( Main (sl, exp) , fl) = p in 
-	(*storefuncs fl functionlist;*)
-	maybetostr (evalexp (Hashtbl.create 100) (Hashtbl.create 100) exp)
+	let ( Main (sl, exp) , fl) = p in
+	maybetostr (evalexp (Hashtbl.create 100) (Hashtbl.create 100) exp fl)
 
 let parsewitherror lexbuf =
 	try Par.top Lex.read lexbuf with
@@ -439,7 +442,7 @@ let doalltests =
 	"basic3: " ^ basicthree ^ " should be 7\n" ^
 	"basic4: " ^ basicfour ^ " should be 7\n" ^
 	"basic5: " ^ basicfive ^ " should be 5\n" ^
-	"fibonacci: " ^ fibonacci ^ " should be 5\n" ^
+	"fibonacci: " ^ fibonacci ^ " should be 55\n" ^
 	"numtest1: " ^ numtestone ^ " should be 10\n" ^
 	"numtest2: " ^ numtesttwo ^ " should be 4\n" ^
 	"numtest3: " ^ "beep boop didn't work" ^ " should be error\n" ^

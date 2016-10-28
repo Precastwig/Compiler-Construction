@@ -66,7 +66,7 @@
 %start <Types.program> top
 %%
 top:
-	| fl = separated_list( SEMICOLON , fundef ); m = maindef; SEMICOLON; EOF { ( m , fl)  }
+	| fl = separated_list( SEMICOLON , fundef ); SEMICOLON; m = maindef; SEMICOLON; EOF { ( m , fl)  }
 	| f = fundef; SEMICOLON; m = maindef; SEMICOLON; EOF 	{  (m, [f]) }
 	| m = maindef; SEMICOLON; EOF					{ (m , []) }
 

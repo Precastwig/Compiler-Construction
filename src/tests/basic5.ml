@@ -1,4 +1,4 @@
 main () {
-	read_int();
-	print_int(5);
+	var x = read_int() in
+	print_int(@x);
 };

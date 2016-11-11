@@ -2,17 +2,27 @@ p=1
 
 k="$1"
 
-if [ $k = "-o" ]; then
+eval "make clean"
+
+if [ $k == "-o" ]; then
 	run="./evaloptimise.native"
+	maker="make o"
 else
-	run="./eval.native"
+	if [ $k == "-i" ]; then
+		run="./interpret.native"
+		maker="make i"
+	else 
+		if [ $k == "-c" ]; then
+			run="./codegen.native"
+			maker="make c"
+		else 
+			run="./eval.native"
+			maker="make"
+		fi
+	fi
 fi
 
-echo run
-
-test -x ./eval.native || ( echo "eval.native not found, have you run make yet?"; exit 1 )
-
-test -x ./evaloptimise.native || ( echo "evaloptimise.native not found, have you run make yet?"; exit 1 )
+eval $maker
 
 echo "Running test basic1 should return 10:"
 echo "tests/basic1.ml" | eval $run
@@ -42,6 +52,16 @@ sleep $p
 echo "Running test basic6 should return unit and throw variable 'X' not defined:"
 echo "tests/basic6.ml" | eval $run
 echo
+sleep $p
+
+echo "Running test basic7 should return 5"
+echo "tests/basic7.ml" | eval $run
+echo
+sleep $p
+
+echo "Running test basic8 should return 140"
+echo "tests/basic8.ml" | eval $run
+echo 
 sleep $p
 
 echo "Running test bisection"

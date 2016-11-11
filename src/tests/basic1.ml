@@ -1,4 +1,5 @@
 main () {
-	p := 5+5; 
+	var p = 5+5 in
+	@p; 
 };
 /*this (argument) { let x = 5 in x }*/

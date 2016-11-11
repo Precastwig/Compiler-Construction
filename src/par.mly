@@ -66,7 +66,7 @@
 %start <Types.program> top
 %%
 top:
-	| fl = separated_list( SEMICOLON , fundef ); SEMICOLON; m = maindef; SEMICOLON; EOF { ( m , fl)  }
+	| fl = separated_list( SEMICOLON , fundef ); m = maindef; SEMICOLON; EOF { ( m , fl)  }
 	| f = fundef; SEMICOLON; m = maindef; SEMICOLON; EOF 	{  (m, [f]) }
 	| m = maindef; SEMICOLON; EOF					{ (m , []) }
 
@@ -91,7 +91,6 @@ exp:
 	| WHILE; e = exp; DO; LEFTBRACE; p = exp; RIGHTBRACE { Types.While (e, p) }
 	| IF; e = exp; DO; p = exp;					{ Types.If (e, p) }
 	| IF; e = exp; DO; p = exp; ELSE; f = exp 	{ Types.Ifelse (e, p, f) }
-
 	| e = exp; PLUS; p = exp 				{ Types.Operator (Plus, e, p) }
 	| e = exp; MINUS; p = exp 				{ Types.Operator (Minus, e, p) }
 	| e = exp; TIMES; p = exp 				{ Types.Operator (Times, e, p) }
@@ -104,16 +103,13 @@ exp:
 	| e = exp; NOT; EQUAL; p = exp 				{ Types.Operator (Noteq, e, p) }
 	| e = exp; AND; p = exp 				{ Types.Operator (And, e, p) }
 	| e = exp; OR; p = exp 				{ Types.Operator (Or, e, p) }
-
 	| NOT; p = exp 				{ Types.Not p }
-
 	| i = INT									{ Types.Const i }
+	| MINUS; i = INT 							{ Types.Const (-i)}
 	| s = STRING								{ Types.String s }
 	| s = STR									{ Types.Identifier s }
 	| AT; e = exp								{ Types.Deref e }
-
 	| e = exp; LEFTROUNDBRACKET; p = exp; RIGHTROUNDBRACKET { Types.Application (e, p) }
-
 	| READINT; LEFTROUNDBRACKET; RIGHTROUNDBRACKET { Types.Readint }
 	| PRINTINT; LEFTROUNDBRACKET; e = exp; RIGHTROUNDBRACKET { Types.Printint (e) }
 	| LET; s = STR; EQUAL; e = exp; IN; f = exp	{ Types.Let (s, e, f) }

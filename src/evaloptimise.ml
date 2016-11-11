@@ -4,7 +4,6 @@ open Lexing
 open Hashtbl
 open Printf
 open Helpers
-open Eval
 
 let rec read_to_empty buf = 
 	let s = read_line() in
@@ -13,14 +12,6 @@ let rec read_to_empty buf =
 			Buffer.add_string buf "\n";
 			read_to_empty buf)
 
-(*Code that loads a file *)
-let load_file f =
-	let ic = open_in f in
-	let n = in_channel_length ic in
-	let s = Bytes.create n in
-	really_input ic s 0 n;
-	close_in ic;
-	(s)
 
 (*Error handling position code*)
 let print_position lexbuf =
@@ -117,6 +108,9 @@ let optimiselookup i store =
 	| Identifier s -> (try Hashtbl.find store s with
 											| Not_found -> Identifier s
 											| e -> Identifier s )
+	| Deref (Identifier s) -> (try Hashtbl.find store s with
+											| Not_found -> Deref (Identifier s)
+											| e -> Deref (Identifier s))
 	| f 	-> f
 	
 let rec checkal a al = 
@@ -136,7 +130,10 @@ let rec checkfor exp al env store =
 								( match k with
 									| Identifier y -> if e = y then true else false
 									| f -> false)
+	| New(x, a, b) -> (checkfor a al env store) || (checkfor b al env store)
+	| Let(x, a, b) -> (checkfor a al env store) || (checkfor b al env store)
 	| Seq(a,b) -> (checkfor a al env store) || (checkfor b al env store)
+	| While (e, a) -> true;
 	| f -> false
 
 let rec simpled exp =
@@ -326,10 +323,11 @@ let rec optimisehelp fl al exp store env =
 								Hashtbl.remove env x; k
 
 	| New (x, e, f)			-> if (checkfor e al env store) then New (x, e, optimisehelp fl al f store env) else
-								if (checkfor f al env store) then New (x, optimisehelp fl al e store env, f) else 
 								let v = optimisehelp fl al e store env in
 								Hashtbl.add store x v;
-								optimisehelp fl al f store env
+								if (checkfor f al env store) then (Hashtbl.remove store x; New (x, v, f)) else
+								(Hashtbl.replace store x v; 
+								optimisehelp fl al f store env)
 							
 	| Seq (f, p)			-> let l = optimisehelp fl al f store env in
 								let v = optimisehelp fl al p store env in 
@@ -355,7 +353,7 @@ let rec optimisehelp fl al exp store env =
 
 	| Application (Identifier id, args) -> 
 							let k = (optimisehelp fl al args store env) in
-							let k = (optimiseargslist env store k) in
+							let q = (optimiseargslist env store k) in
 							if simpled args then (
 							let (sl, exp) = findfunc fl id in
 							(*	printf "Application %s\n" (printexp args 0); *)
@@ -363,12 +361,12 @@ let rec optimisehelp fl al exp store env =
 												| [] -> ""
 												| x :: xs -> maybetostr x ^ " " ^ flatten xs) in 
 								printf "After evalexplist %s" (flatten k); *)
-								argsexpcreate env k sl;
+								argsexpcreate env q sl;
 								optimisehelp fl al exp store env ) else Application( Identifier id, args)
 	| Readint				-> Readint
 	| Printint(e)			-> Printint( optimisehelp fl al e store env)
 	| Identifier x 			-> if checkal x al then Identifier x else optimiselookup (Identifier x) env
-	| Deref (Identifier e) 	-> optimiselookup (Identifier e) store
+	| Deref (Identifier e) 	-> if checkal e al then Identifier e else optimiselookup (Deref (Identifier e)) store
 	| f						-> f 
 
 let rec optimiselist fl store =
@@ -396,18 +394,19 @@ let rec optimise p store =
 let rec printfunclist fl =
 	match fl with
 	| [] -> ()
-	| Fun (s, sl, exp) :: xs -> printf "%s, %s\n" s (printexp exp 0); printfunclist xs
+	| Fun (s, sl, exp) :: xs -> printf "%s,\n %s\n" s (printexp exp 0); printfunclist xs
 	
 let rec evalexpprogram p =
 	let env = (Hashtbl.create 100) in
 	let store = (Hashtbl.create 100) in
 	let ( Main (sl, pexp) , pfl) = p in
-(*	printf "before %s\n" (printexp pexp 0); *)
+	printf "before \n%s\n" (printexp pexp 0); 
+	printfunclist pfl; 
 	let k = optimise p store in
-	(*let k = optimisetwo k store in*)
+(*	let k = optimisetwo k store in*)
 	let ( Main (sl, exp) , fl) = k in
-	printfunclist fl;
-	printf "after %s\n" (printexp exp 0);
+	printf "after \n%s\n" (printexp exp 0);
+	printfunclist fl; 
 	maybetostr (evalexp (Hashtbl.create 100) (Hashtbl.create 100) exp fl)
 
 let parsewitherror lexbuf =

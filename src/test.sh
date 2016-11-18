@@ -16,8 +16,16 @@ else
 			run="./codegen.native"
 			maker="make c"
 		else 
-			run="./eval.native"
-			maker="make"
+			if [ $k == "-co" ]; then
+				run="./codegen.native"
+				maker="make c"
+				eval $maker
+				echo "tests/template.c" | eval $run
+				exit 0
+			else
+				run="./eval.native"
+				maker="make"
+			fi		
 		fi
 	fi
 fi

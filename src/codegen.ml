@@ -4,6 +4,8 @@ open Interprethelpers
 open Helpers
 open Printf
 
+let code = Buffer.create 100
+let sp = ref 0
 let ram = ((Hashtbl.create 100) : ((int,int) Hashtbl.t))
 let acc = ref 0
 let new_addr = let i = ref 0 in (fun () -> incr i; !i)
@@ -23,7 +25,6 @@ let string_of_operator = function
 	| Greater -> "greater"
 	| Less -> "less"
 
-let code = Buffer.create 100
 let codegen_op (op, addr1, addr2) =
 	(string_of_operator op) ^ " r" ^ (string_of_int addr1) ^ ", r" ^ (string_of_int addr2) ^ "\n"
 	|> Buffer.add_string code
@@ -58,10 +59,9 @@ let rec codegen symt = function
 		codegen symt b
 	| a -> printf "Not implemented: %s\n" (printexp a 0); raise Not_found
 
-let codegen_prefix code = ("
-	.section	.rodata
+let codegen_prefix = "	.section	.rodata
 .LC0:
-	.string	\"%d\n\"
+	.string	\"%d\\n\"
 	.text
 	.globl	print
 	.type	print, @function
@@ -96,11 +96,11 @@ main:
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
 	subq	$16, %rsp
-	movl	$260, -4(%rbp)
-	movl	-4(%rbp), %eax") |> Buffer.add_string code
+//End template code
+"
 
-let codegen_suffix code = ("//Moves top stack to edi
-	popq %edi
+let codegen_suffix = "//Begin templates again Moves top stack to edi
+	popq %rdi
 	//Below auto
 	call	print
 	movl	$1, %eax
@@ -111,7 +111,8 @@ let codegen_suffix code = ("//Moves top stack to edi
 .LFE3:
 	.size	main, .-main
 	.ident	\"GCC: (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0 20160609\"
-	.section	.note.GNU-stack,"",@progbits" ) |> Buffer.add_string code
+	.section	.note.GNU-stack,\"\",@progbits
+"
 	
 	
 let codegenx86_op op =
@@ -121,8 +122,8 @@ let codegenx86_op op =
 	"push %rbx\n" |> Buffer.add_string code
 	
 let codegenx86_id addr =
-	"//offset " ^ (string_of_int addr) ^ "an" ^
-	"mov " ^ -16 - 4 * addr |> string_of_int ^ "(%rbp), %rax\n" ^
+	"//offset " ^ (string_of_int addr) ^ "an\n" ^
+	"mov " ^ (-16 - 4 * addr |> string_of_int) ^ "(%rbp), %rax\n" ^
 	"push %rax\n"
 	|> Buffer.add_string code
 	
@@ -166,8 +167,7 @@ let codegener f =
 	( f 
 	|> Lexing.from_string
 	|> parsewitherror
-	|> codegenprogram
-	|> string_of_int)
+	|> codegenprogram)
 	
 let rec print_str oc str = Printf.fprintf oc "%s\n" str; ()
 
@@ -177,26 +177,28 @@ let explode s =
 	exp (String.length s - 1) []
 	
 let implode l = 
-	let res = String.create (List.length l) in
+	let res = Bytes.create (List.length l) in
   let rec imp i = function
   | [] -> res
   | c :: l -> res.[i] <- c; imp (i + 1) l in
   imp 0 l
+  
+let rec o e = (match e with
+	| [] -> []
+	| x :: xs -> if x == '.' then [] else x :: (o xs))
 
 let nameget str = 
 	let e = explode str in
-	let o = (match e with
-	| [] -> []
-	| x :: xs -> if x == '.' then [] else x :: (o xs)) in
 	implode (o e)
 		
 let _ = Buffer.reset code;
 		let filename = read_line() in
 		let file = ( filename |> load_file ) in
 		sp := 0;
-		codegen_prefix code;
-		let r = codegener file in
 		let filename = (nameget filename) ^ ".s" in
 		let oc = open_out filename in
-		codegen_suffix code;
+		Buffer.add_string code codegen_prefix;
+		codegener file;
+		Buffer.add_string code codegen_suffix;
+		printf "%s\n" filename;
 		Buffer.output_buffer oc (code);

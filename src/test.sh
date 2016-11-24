@@ -20,8 +20,6 @@ else
 				run="./codegen.native"
 				maker="make c"
 				eval $maker
-				echo "tests/template.c" | eval $run
-				exit 0
 			else
 				run="./eval.native"
 				maker="make"
@@ -32,107 +30,296 @@ fi
 
 eval $maker
 
-echo "Running test basic1 should return 10:"
-echo "tests/basic1.ml" | eval $run
+f="basic1"
+echo "Running test $f should return 10:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic2 should return 3:"
-echo "tests/basic2.ml" | eval $run
+f="basic2"
+echo "Running test $f should return 3:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic3 should return 7:"
-echo "tests/basic3.ml" | eval $run
+f="basic3"
+echo "Running test $f should return 7:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic4 should return 103:"
-echo "tests/basic4.ml" | eval $run
+f="basic4"
+echo "Running test $f should return 103:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic5 should print 5 and return 5:"
-(echo "tests/basic5.ml" | eval $run) <<< 4
+f="basic5"
+echo "Running test $f should print 5 and return 5:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic6 should return unit and throw variable 'X' not defined:"
-echo "tests/basic6.ml" | eval $run
+f="basic6"
+echo "Running test $f should return unit and throw variable 'X' not defined:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic7 should return 5"
-echo "tests/basic7.ml" | eval $run
+f="basic7"
+echo "Running test $f should return 5"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test basic8 should return 140"
-echo "tests/basic8.ml" | eval $run
-echo 
+f="basic8"
+echo "Running test $f should return 140"
+echo "tests/$f.ml" | eval $run
+echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test bisection"
-echo "tests/bisection.ml" | eval $run
+f="bisection"
+echo "Running test $f"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test fibonacci should return 55"
-echo "tests/fibonacci.ml" | eval $run
+f="fibonacci"
+echo "Running test $f should return 55"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test numtest1 should return 10"
-echo "tests/numtest1.ml" | eval $run
+f="numtest1"
+echo "Running test $f should return 10"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test numtest2 should return 4"
-echo "tests/numtest2.ml" | eval $run
+f="numtest2"
+echo "Running test $f should return 4"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test numtest3 should return unit and throw variable 'X' not defined:"
-echo "tests/numtest3.ml" | eval $run
+f="numtest3"
+echo "Running test $f should return unit and throw variable 'X' not defined:"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test numtest4 should print from 0 to 7 then return 7"
-echo "tests/numtest4.ml" | eval $run
+f="numtest4"
+echo "Running test $f should print from 0 to 7 then return 7"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test alltype1 should return 12"
-echo "tests/alltype1.ml" | eval $run
+f="alltype1"
+echo "Running test $f should return 12"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test alltype2 should return 5"
-echo "tests/alltype2.ml" | eval $run
+f="alltype2"
+echo "Running test $f should return 5"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test alltype3 should return 7"
-echo "tests/alltype3.ml" | eval $run
+f="alltype3"
+echo "Running test $f should return 7"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test alltype4 should print 120, 5, 120 and return 120"
-echo "tests/alltype4.ml" | eval $run
+f="alltype4"
+echo "Running test $f should print 120, 5, 120 and return 120"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test alltype5 should print 0, 1, 2, 3, 4 then return 4 (?)"
-echo "tests/alltype5.ml" | eval $run
+f="alltype5"
+echo "Running test $f should print 0, 1, 2, 3, 4 then return 4 (?)"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test otest1 should take a value and return that + 4 * 7"
-echo "tests/otest1.ml" | eval $run
+f="otest1"
+echo "Running test $f should take a value and return that + 4 * 7"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p
 
-echo "Running test otest2 should take a value then return 6 + that value until the result is above 10"
-echo "tests/otest2.ml" | eval $run
+f="otest2"
+echo "Running test $f should take a value then return 6 + that value until the result is above 10"
+echo "tests/$f.ml" | eval $run
 echo
+if [ $k == "-co" ]; then
+	if [ -f "tests/$f.s" ]; then
+		eval "bash tests/assemblyrun.sh tests/$f"
+		eval "./tests/$f"
+	else
+		echo "$f.s does not exist"
+	fi
+fi
 sleep $p

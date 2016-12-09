@@ -66,6 +66,10 @@ let rec interpret symt = function
 	| New (x, e1, e2) ->
 		let addr1 = interpret symt e1 in
 		interpret ((x, addr1) :: symt) e2
+	| While (x, e) ->
+		while (let xx = interpret symt x in (find ram xx) != 0 ) do
+			interpret symt e
+		done
 	| _ -> raise Not_found
 
 let interpretprogram = function

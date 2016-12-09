@@ -1,3 +1,7 @@
+add(k) {
+	if (k = 0) do 5 else 3
+};
+
 main () { 
 	var x = 5 in
 	var y = 0 in
@@ -6,4 +10,3 @@ main () {
 	if (@x=5) do (p:=@x+2);
 	@x;
 };
-

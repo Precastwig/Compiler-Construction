@@ -36,13 +36,8 @@ main:
 	.cfi_def_cfa_register 6
 	subq	$16, %rsp
 //End template code
-push $7
-push $3
-pop %rax
-pop %rbx
-add %rax, %rbx
-push %rbx
-//Moves top stack to edi
+push $10
+//Begin templates again Moves top stack to edi
 	popq %rdi
 	//Below auto
 	call	print

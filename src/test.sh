@@ -30,7 +30,7 @@ fi
 
 eval $maker
 
-f="basic1"
+f="thing"
 echo "Running test $f should return 10:"
 echo "tests/$f.ml" | eval $run
 echo
@@ -77,8 +77,8 @@ echo "Running test $f should return 103:"
 echo "tests/$f.ml" | eval $run
 echo
 if [ $k == "-co" ]; then
-	if [ -f "tests/$f.s" ]; then
-		eval "bash tests/assemblyrun.sh tests/$f"
+	eval "bash tests/assemblyrun.sh tests/$f"
+	if [ -f "tests/$f" ]; then
 		eval "./tests/$f"
 	else
 		echo "$f.s does not exist"

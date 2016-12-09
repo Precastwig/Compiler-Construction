@@ -37,13 +37,7 @@ main:
 	subq	$16, %rsp
 //End template code
 push $4
-//offset 1an
-mov -20(%rbp), %rax
-push %rax
-pop %rax
-pop %rbx
-push %rax
-//Moves top stack to edi
+//Begin templates again Moves top stack to edi
 	popq %rdi
 	//Below auto
 	call	print

@@ -14,16 +14,16 @@ let string_of_operator = function
 	| Plus -> "add"
 	| Minus -> "sub"
 	| Times -> "mul"
-	| Divide -> "div"
-	| Leq -> "leq"
-	| Geq -> "geq"
-	| Equal -> "eq"
-	| And -> "and"
-	| Or -> "or"
+	| Divide -> "idiv"
+	| Leq -> "cmp"
+	| Geq -> "cmp"
+	| Equal -> "cmp"
+	| And -> "cmp"
+	| Or -> "cmp"
 	| Not -> "not"
-	| Noteq -> "neq"
-	| Greater -> "greater"
-	| Less -> "less"
+	| Noteq -> "cmp"
+	| Greater -> "cmp"
+	| Less -> "cmp"
 
 let codegen_op (op, addr1, addr2) =
 	(string_of_operator op) ^ " r" ^ (string_of_int addr1) ^ ", r" ^ (string_of_int addr2) ^ "\n"
@@ -87,7 +87,9 @@ print:
 	.size	print, .-print
 	.globl	main
 	.type	main, @function
-main:
+"
+
+let codegen_infix = "main:
 .LFB3:
 	.cfi_startproc
 	pushq	%rbp
@@ -122,8 +124,8 @@ let codegenx86_op op =
 	"push %rbx\n" |> Buffer.add_string code
 	
 let codegenx86_id addr =
-	"//offset " ^ (string_of_int addr) ^ "an\n" ^
-	"mov " ^ (-16 - 4 * addr |> string_of_int) ^ "(%rbp), %rax\n" ^
+	"//offset " ^ (string_of_int addr) ^ "\n" ^
+	"mov " ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp), %rax\n" ^
 	"push %rax\n"
 	|> Buffer.add_string code
 	
@@ -136,12 +138,36 @@ let codegenx86_let _ =
 	"push %rax\n"
 	|> Buffer.add_string code
 
+(*let codegenx86_if exp =
+*)
+let rec exptolist exp = 
+	match exp with
+	| Seq (a, b) -> (exptolist a) @ (exptolist b)
+	| Const n -> [n]
+	| _ -> printf "Not an argument list\n"; raise Not_found
+
+let rec codegenx86_args k = 
+	match k with
+	| [] -> ()
+	| x :: xs -> codegenx86_args xs; Buffer.add_string code ("push " ^ ( x |> string_of_int) ^ "\n")
+
+let k = ref 0
+
 let rec codegenx86 symt = function
+	| True -> Buffer.add_string code "movq $0, %rax\ncmp %rax, %rax\n";
+		sp := !sp - 1
+	| False -> Buffer.add_string code "push $0\n";
+		sp := !sp - 1
+	| Operator (Divide, e1, e2) ->
+		codegenx86 symt e1;
+		Buffer.add_string code ("popq %rax\n");
+		codegenx86 symt e2;
+		Buffer.add_string code ("popq %rbx\nidiv %rbx\npush %rax\n");
 	| Operator (op, e1, e2) ->
 		codegenx86 symt e1;
 		codegenx86 symt e2;
 		codegenx86_op op;
-		sp := !sp - 1
+		sp := !sp - 1	
 	| Identifier x ->
 		let addr = Interprethelpers.lookup x symt in
 		codegenx86_id (addr);
@@ -157,17 +183,93 @@ let rec codegenx86 symt = function
 		codegenx86 symt e1;
 		codegenx86 ((x, !sp) :: symt) e2;
 		codegenx86_let ()
+	| New (x, e1, e2) ->
+		codegenx86 symt e1;
+		codegenx86 ((x, !sp) :: symt) e2;
+		codegenx86_let ()
+	| Seq (a, b) ->
+		codegenx86 symt a;
+		codegenx86 symt b
+	| Application (Identifier id, args) ->
+		let k = exptolist args in
+		codegenx86_args k;
+		Buffer.add_string code ("call " ^ id ^ "\n");
+	| If (x, e) ->
+		codegenx86 symt x;
+		Buffer.add_string code ("jnz IF" ^ (!k |> string_of_int) ^"\n");
+		k := !k + 1;		
+		codegenx86 symt e;
+		k := !k - 1;
+		Buffer.add_string code ("IF"^(!k |> string_of_int) ^":\n");
+		k := !k + 1
+	| Ifelse (x, e1, e2) -> 
+		codegenx86 symt x;
+		Buffer.add_string code ("jz IF" ^ (!k |> string_of_int) ^"\n");
+		k := !k + 1;		
+		codegenx86 symt e2;
+		k := !k - 1;
+		Buffer.add_string code ("jmp ENDIF"^(!k |> string_of_int) ^ "\nIF" ^ (!k |> string_of_int) ^ ":\n" );
+		k := !k + 1;
+		codegenx86 symt e1;
+		k := !k - 1;
+		Buffer.add_string code ("ENDIF"^(!k |> string_of_int) ^ ":\n");
+		k := !k + 1
+	| Asg (Identifier x, e) -> 
+		let addr = Interprethelpers.lookup x symt in
+		codegenx86 symt e;
+		Buffer.add_string code ("pop " ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp)\n" )
+	| While (x, e) ->
+		Buffer.add_string code ("WHILE" ^ (!k |> string_of_int) ^":\n");
+		k := !k + 1;
+		codegenx86 symt x;
+		k := !k - 1;
+		Buffer.add_string code ("jz ENDWHILE" ^(!k |> string_of_int) ^ "\n");
+		k := !k + 1;		
+		codegenx86 symt e;
+		k := !k - 1;
+		Buffer.add_string code ("jmp WHILE"^(!k |> string_of_int) ^ "\nENDWHILE" ^ (!k |> string_of_int) ^ ":\n");
+		k := !k + 1		
+	| Printint(e) -> 
+		codegenx86 symt e;
+		Buffer.add_string code ("popq %rdi\ncall print\n")
 	| a -> printf "Not implemented: %s\n" (printexp a 0); raise Not_found
-		
+
+let rec makearglist sl i =
+	match sl with
+	| [] -> []
+	| x :: xs -> (x, i) :: makearglist xs (i+1)
+
+let rec getlength p = 
+	match p with
+	| [] -> 0
+	| x :: xs -> 1 + getlength xs
+	
+let makefun exp = 
+	let Fun (s, sl, ex) = exp in
+	let len = (getlength sl) * 8 + 16 in
+	let fl = makearglist sl 1 in
+	Buffer.add_string code (s ^ ":\n.cfi_startproc\n pushq %rbp\n movq %rsp, %rbp\n subq $" ^ (len |> string_of_int) ^ ", %rsp\n");
+	codegenx86 fl ex;
+	Buffer.add_string code ("movq %rbp, %rsp\n pop %rbp \n retq\n 	.cfi_endproc\n")
+
+let rec codegenfunctions fl = 
+	match fl with
+	| [] -> ()
+	| x :: [] -> makefun x
+	| x :: xs -> makefun x; codegenfunctions xs
+
 let codegenprogram p = 
 	match p with
-	| (Main (sl, exp), fl) -> codegenx86 [] exp
+	| (Main (sl, exp), fl) -> codegenfunctions fl;
+							Buffer.add_string code codegen_infix;
+							codegenx86 [] exp
 		
 let codegener f =
-	( f 
+	let p = ( f 
 	|> Lexing.from_string
-	|> parsewitherror
-	|> codegenprogram)
+	|> parsewitherror) in
+	let p = optimise p (Hashtbl.create 100) in
+	codegenprogram p
 	
 let rec print_str oc str = Printf.fprintf oc "%s\n" str; ()
 

@@ -3,5 +3,5 @@ plus (x, y) {
 };
 
 main () {
-	plus(5, 7);
+	plus(plus(2,3), 7);
 };

@@ -1,5 +1,5 @@
 # CompilerConstruction
-UoB school work, creating a compiler.
+Creating a compiler, the syntax for the language is located in the documentation folder, although many parts of this compiler are non-working at the moment.
 
 How to compile:
 	Navigate to the directory /src/ and call
@@ -14,5 +14,3 @@ Running the program automatically runs all available tests and compares them to 
 Test files are located in /src/tests/
 
 Documentation on syntax and test files are in /documentation/
-
-## Made by Felix Hiller for a course at the University of Birmingham, fxh416, 1446415 ##
